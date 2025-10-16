@@ -313,4 +313,5 @@ If signing digitally, each team member should:
 
 - Mariam Tarkashvili agreed on 10/10/2025
 - Saba Samkharadze agreed on 10/10/2025
+- Tekla Chaphidze agreed on 10/16/2025
 - **[Name]** agreed on [Date]
