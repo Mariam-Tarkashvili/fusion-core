@@ -56,78 +56,80 @@ Before cloning the repository, make sure the following are installed on your sys
 ## 4. Environment Setup Steps
 
 ### Step 1: Clone the Repository
-    ```bash
+```bash
 git clone https://github.com/<your-org-or-username>/medsplain.git
 cd medsplain
 Step 2: Backend Setup (FastAPI + Python)
 Navigate to the backend folder
-     ```bash
+```
 
-    ```bash
+
+```bash
 cd backend
 Create and activate a virtual environment
-    ```bash
+```
 
-    ```bash
+```bash
 python -m venv .venv
 source .venv/bin/activate       # macOS/Linux
 .venv\Scripts\activate          # Windows
 Install dependencies
-    ```bash
+```
 
-    ```bash
+```bash
 pip install -r requirements.txt
 Copy environment variables
-    ```bash
+```
 
-    ```bash
+ ```bash
 cp .env.example .env
 Then, open .env and fill in your own keys:
-    ```bash
+ ```
 
-    ```bash
+ ```bash
 OPENAI_API_KEY=your_openai_key_here
 DATABASE_URL=postgresql://user:password@localhost:5432/medsplain
 Run the backend
-    ```bash
+ ```
     
-    ```bash
+```bash
 uvicorn main:app --reload
 Visit: http://127.0.0.1:8000/docs to view FastAPI documentation.
-    ```bash
+```
 
 Step 3: Frontend Setup (Next.js + React)
 Open new terminal tab/window
 
-    ```bash
-Copy code
+ ```bash
 cd frontend
 Install dependencies
+```
 
-  ```bash
-Copy code
+```bash
 npm install
 Run local dev server
+```
 
  ```bash
-Copy code
 npm run dev
 Visit: http://localhost:3000
+```
 
 Environment variables
 
  ```bash
-
 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
 NEXT_PUBLIC_APP_NAME=Medsplain
 Step 4: Database Setup (PostgreSQL)
 Create a local database
+```
 
 ```bash
 psql -U postgres
 CREATE DATABASE medsplain;
 Apply schema (if provided later)
 Migrations will be handled via Alembic in later weeks.
+```
 
 Step 5: Test the Connection (Hello World)
 Backend test
@@ -153,20 +155,15 @@ ModuleNotFoundError	Missing dependency	Run pip install -r requirements.txt
 API call fails from frontend	Wrong backend URL	Check .env in frontend/ folder
 Port already in use	Previous run not stopped	Kill process using port 8000 or 3000
 
-6. Setup Checklist
- Repo cloned successfully
+## 6. Setup Checklist
 
- Backend runs locally (uvicorn main:app --reload)
-
- Frontend runs locally (npm run dev)
-
- “Hello World” verified
-
- .env configured and not committed
-
- PostgreSQL running locally
-
- All dependencies installed without errors
+- [ ] Repo cloned successfully  
+- [ ] Backend runs locally (`uvicorn main:app --reload`)  
+- [ ] Frontend runs locally (`npm run dev`)  
+- [ ] “Hello World” verified  
+- [ ] `.env` configured and not committed  
+- [ ] PostgreSQL running locally  
+- [ ] All dependencies installed without errors  
 
 7. Future Environment Notes
 Cloud Hosting:
