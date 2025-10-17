@@ -31,7 +31,7 @@ Before cloning the repository, make sure the following are installed on your sys
 ---
 
 ## 3. Repository Structure
-
+```bash
 /medsplain/
 │
 ├── frontend/
@@ -51,7 +51,7 @@ Before cloning the repository, make sure the following are installed on your sys
 │
 ├── .env.example 
 └── README.md
-
+```
 
 ## 4. Environment Setup Steps
 
@@ -59,10 +59,10 @@ Before cloning the repository, make sure the following are installed on your sys
 ```bash
 git clone https://github.com/<your-org-or-username>/medsplain.git
 cd medsplain
-Step 2: Backend Setup (FastAPI + Python)
-Navigate to the backend folder
-```
 
+```
+### Step 2: Backend Setup (FastAPI + Python)
+Navigate to the backend folder
 
 ```bash
 cd backend
@@ -97,7 +97,7 @@ uvicorn main:app --reload
 Visit: http://127.0.0.1:8000/docs to view FastAPI documentation.
 ```
 
-Step 3: Frontend Setup (Next.js + React)
+### Step 3: Frontend Setup (Next.js + React)
 Open new terminal tab/window
 
  ```bash
@@ -115,7 +115,7 @@ npm run dev
 Visit: http://localhost:3000
 ```
 
-Environment variables
+### Step 4: Environment variables
 
  ```bash
 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
@@ -131,7 +131,7 @@ Apply schema (if provided later)
 Migrations will be handled via Alembic in later weeks.
 ```
 
-Step 5: Test the Connection (Hello World)
+### Step 5: Test the Connection (Hello World)
 Backend test
 
 Go to http://127.0.0.1:8000/health
@@ -148,7 +148,7 @@ You should see “Hello from Medsplain!” or a sample medication input box.
 
 ✅ If both are working, your setup is complete!
 
-5. Common Issues & Fixes
+## 5. Common Issues & Fixes
 Issue	Possible Cause	Fix
 uvicorn not found	Virtual environment not activated	Run source .venv/bin/activate
 ModuleNotFoundError	Missing dependency	Run pip install -r requirements.txt
@@ -165,7 +165,7 @@ Port already in use	Previous run not stopped	Kill process using port 8000 or 300
 - [ ] PostgreSQL running locally  
 - [ ] All dependencies installed without errors  
 
-7. Future Environment Notes
+## 7. Future Environment Notes
 Cloud Hosting:
 
 Frontend → Vercel (auto-deploy on main branch)
