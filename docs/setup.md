@@ -66,70 +66,62 @@ Navigate to the backend folder
 
 ```bash
 cd backend
-Create and activate a virtual environment
 ```
-
+Create and activate a virtual environment
 ```bash
 python -m venv .venv
 source .venv/bin/activate       # macOS/Linux
 .venv\Scripts\activate          # Windows
-Install dependencies
 ```
-
+Install dependencies
 ```bash
 pip install -r requirements.txt
-Copy environment variables
 ```
-
+Copy environment variables
  ```bash
 cp .env.example .env
-Then, open .env and fill in your own keys:
  ```
 
+Then, open .env and fill in your own keys:
  ```bash
 OPENAI_API_KEY=your_openai_key_here
 DATABASE_URL=postgresql://user:password@localhost:5432/medsplain
-Run the backend
  ```
-    
+Run the backend    
 ```bash
 uvicorn main:app --reload
-Visit: http://127.0.0.1:8000/docs to view FastAPI documentation.
 ```
+Visit: http://127.0.0.1:8000/docs to view FastAPI documentation.
 
 ### Step 3: Frontend Setup (Next.js + React)
 Open new terminal tab/window
 
  ```bash
 cd frontend
-Install dependencies
 ```
-
+Install dependencies
 ```bash
 npm install
-Run local dev server
 ```
-
+Run local dev server
  ```bash
 npm run dev
-Visit: http://localhost:3000
 ```
+Visit: http://localhost:3000
 
-### Step 4: Environment variables
-
+ Environment variables
  ```bash
 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
 NEXT_PUBLIC_APP_NAME=Medsplain
-Step 4: Database Setup (PostgreSQL)
-Create a local database
 ```
-
+### Step 4: Database Setup (PostgreSQL)
+Create a local database
 ```bash
 psql -U postgres
 CREATE DATABASE medsplain;
+```
 Apply schema (if provided later)
 Migrations will be handled via Alembic in later weeks.
-```
 
 ### Step 5: Test the Connection (Hello World)
 Backend test
