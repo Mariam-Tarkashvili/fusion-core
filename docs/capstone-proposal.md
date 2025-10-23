@@ -107,29 +107,20 @@ An AI-powered medication explainer addresses this by translating complex medical
 **How we'll know our solution works:**
 
 1. **Metric #1: Comprehension Improvement**
-
-   - Target: 80%+ of users correctly answer 4/5 questions about their medication after one session (vs. baseline of ~40% from package insert alone)
-   - Measurement method: Pre/post comprehension quiz (5 questions: What does this treat? How do I take it? Name 2 common side effects. Name 1 serious warning sign. What do I do if I miss a dose?)
-
+    - Target: 70%+ of users correctly answer 3/5 questions about their medication after one session (vs. baseline of ~40% from package insert alone)
+    - Measurement method: Pre/post comprehension quiz (5 questions: What does this treat? How do I take it? Name 2 common side effects. Name 1 serious warning sign. What do I do if I miss a dose?)
 2. **Metric #2: User Confidence**
-
-   - Target: Average 4.2/5 rating on "I feel confident taking this medication as prescribed"
-   - Measurement method: Post-session survey with 5-point Likert scale
-
+    - Target: Average 3.8/5 rating on "I feel confident taking this medication as prescribed"
+    - Measurement method: Post-session survey with 5-point Likert scale
 3. **Metric #3: Session Efficiency**
-
-   - Target: Average session time 3-5 minutes (vs. 15-30 minutes of googling)
-   - Measurement method: Time from medication input to user exiting session
-
+    - Target: Average session time 3-7 minutes (vs. 15-30 minutes of googling)
+    - Measurement method: Time from medication input to user exiting session
 4. **Metric #4: Information Quality**
-
-   - Target: 90%+ of users rate explanation as "helpful" or "very helpful"; 85%+ say it answered their questions
-   - Measurement method: Post-session survey
-
+    - Target: 80%+ of users rate explanation as "helpful" or "very helpful"; 75%+ say it answered their questions
+    - Measurement method: Post-session survey
 5. **Metric #5: Adoption & Engagement**
-
-   - Target: 30 unique users with at least 50 total sessions; 15 users who return for a second medication
-   - Measurement method: Usage analytics (anonymized user IDs, session counts)
+    - Target: 20 unique users with at least 30 total sessions; 10 users who return for a second medication
+    - Measurement method: Usage analytics (anonymized user IDs, session counts)
 
 ---
 
@@ -137,36 +128,42 @@ An AI-powered medication explainer addresses this by translating complex medical
 
 **Minimum viable performance:**
 
-- Response latency: <3 seconds for initial explanation; <2 seconds for follow-up questions (p95)
-- Availability: 95% uptime during 4-week user testing period
-- Accuracy: 95%+ factual accuracy for medication info
-- Error rate: <5% of requests fail or produce nonsensical output
-- Cost per user: <$0.15 per complete session (explanation + 3-5 follow-up questions)
+- Response latency: <5 seconds for initial explanation; <3 seconds for follow-up questions (p95)
+- Availability: 90% uptime during 4-week user testing period
+- Accuracy: 90%+ factual accuracy for medication info
+- Error rate: <8% of requests fail or produce nonsensical output
+- Cost per user: <$0.25 per complete session (explanation + 3-5 follow-up questions)
 - Safety: Zero instances of contradicting doctor's orders or missing dangerous interactions in testing
-
 ---
 
-### Learning Goals TBD
+### Learning Goals
 
 **What each team member wants to learn:**
 
-**[Team Member 1]:**
+**Tekla Chaphidze:**
 
 - Prompt engineering for adaptive reading levels and medical accuracy
 - Designing AI systems with high safety requirements (medical domain)
-- RAG implementation for structured medical data (FDA labels, drug databases)
+- Evaluating AI output quality in high-stakes domains
 
-**[Team Member 2]:**
+**Saba Samkharadze:**
 
 - Frontend design for non-technical users (accessibility, large text, simple navigation)
 - User research methods with vulnerable populations (patients, elderly)
 - Handling streaming responses and conversational state management
 
-**[Team Member 3]:** (if applicable)
+**Giorgi Ksovreli:**
 
 - Evaluating AI output quality in high-stakes domains
 - Building telemetry and monitoring for production LLM apps
+- Interaction with different AI apis
+
+**Mariam Tarkashvili:** 
 - Cost optimization for LLM APIs (caching, prompt compression)
+- RAG implementation for structured medical data (FDA labels, drug databases)
+- Building telemetry and monitoring for production LLM apps
+
+
 
 ---
 
@@ -203,7 +200,7 @@ The frontend is built with Next.js for responsive mobile design, while a Python 
                        │ API Gateway
                        ▼
 ┌──────────────────────────────────────────────────────┐
-│         Backend (FastAPI + Python 3.11)              │
+│         Backend (FastAPI + Python)              │
 │                                                       │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
 │  │   Routes    │  │  Safety     │  │   Prompt    │ │
