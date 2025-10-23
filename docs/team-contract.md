@@ -309,4 +309,4 @@ This clause does not prevent the team from publicly sharing non-commercial work 
 - Mariam Tarkashvili agreed on 10/10/2025
 - Saba Samkharadze agreed on 10/10/2025
 - Tekla Chaphidze agreed on 10/16/2025
-- **[Name]** agreed on [Date]
+- Giorgi Ksovreli agreed on 10/23/2025
