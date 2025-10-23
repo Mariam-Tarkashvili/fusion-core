@@ -303,13 +303,8 @@ Any proposal to commercialize, publish for profit, or transfer ownership of the 
 
 This clause does not prevent the team from publicly sharing non-commercial work (e.g., academic publications, demos, or portfolio excerpts) provided such sharing does not enable commercial redistribution or violate any third-party licenses used in the project.
 
-## For Digital Signatures
+## Digital Signatures
 
-If signing digitally, each team member should:
-
-1. Type their full name below
-2. Add the date
-3. Commit this file with a commit message: "Sign team contract - [Your Name]"
 
 - Mariam Tarkashvili agreed on 10/10/2025
 - Saba Samkharadze agreed on 10/10/2025
