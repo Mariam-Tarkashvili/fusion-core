@@ -17,6 +17,7 @@ Fusion Core is an AI-driven platform designed to bridge innovation and intellige
 This repository serves as the central workspace for our capstone project, containing all documentation, source code, research, and collaborative artifacts.
 
 🧩 Repository Structure
+```bash
 FusionCore/
 │
 ├── docs/                 # Research, proposal, and documentation
@@ -33,7 +34,7 @@ FusionCore/
 ├── .gitignore
 ├── LICENSE
 └── README.md
-
+```
 🎯 Week 2 Deliverable: Capstone Proposal
 Contents
 
