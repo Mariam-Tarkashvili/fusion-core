@@ -1,9 +1,10 @@
 # Refined Capstone Proposal (Version 2)
 
-**Project Name:** Medsplain – AI-Powered Medication Information Translator
-**Team Members:** Mariam Tarkashvili, Saba Samkharadze, Tekla Chapidze, Giorgi Ksovreli, Akaki Ghachava
-**Date: October 30, 2025**
-**Version:** 2.0 (Updated from Week 2 submission)
+**Project Name:** Medsplain – AI-Powered Medication Information Translator  
+**Team Members:** Mariam Tarkashvili, Saba Samkharadze, Tekla Chapidze, Giorgi Ksovreli, Akaki Ghachava  
+**Date:** October 30, 2025  
+**Version:** 2.0 (Updated from Week 2 submission)  
+
 
 ## 📋 Document Change Log
 
