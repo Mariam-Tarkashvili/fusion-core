@@ -819,15 +819,31 @@ N/A
 
 ### A. Technology Research Summary
 
-**Why FastAPI over Flask?**
-- Researched: Compared performance benchmarks, async capabilities, type safety
-- Decision: FastAPI chosen for async support (needed for streaming) and automatic API docs
-- Source: [Links to research]
+**Why Flask + CORS over FastAPI?**  
+- Researched: Compared ease of setup, CORS handling, async streaming, community support  
+- Decision: Flask chosen for simpler integration with frontend and RAG pipeline, sufficient async support for MVP  
+- Source: Flask official docs, Stack Overflow, benchmark articles on Python web frameworks  
 
-**Why PostgreSQL over MongoDB?**
-- Researched: Data model analysis, consistency requirements, query patterns
-- Decision: Relational structure fits our data (users → receipts → categories)
-- Source: [Links to research]
+**Why PostgreSQL over MongoDB?**  
+- Researched: Evaluated relational vs document-based data models, query complexity, consistency needs  
+- Decision: PostgreSQL chosen to model structured relationships between users, medication queries, and cached results  
+- Source: PostgreSQL docs, database comparison articles  
+
+**Why Pinecone for RAG vector search?**  
+- Researched: Compared vector DBs (FAISS, Pinecone, Weaviate) on speed, scaling, API usability  
+- Decision: Pinecone chosen for easy cloud setup, scalable semantic search, and Python integration  
+- Source: Pinecone docs, LangChain RAG tutorials, performance benchmarks  
+
+**Why GPT-4o-mini as primary model?**  
+- Researched: Compared GPT-4 vs GPT-4o-mini vs Claude Sonnet 3.5 for accuracy, cost, latency  
+- Decision: GPT-4o-mini selected for cost-effective patient-friendly explanations, fallback to Claude if needed  
+- Source: OpenAI API docs, internal tests on sample drug explanations  
+
+**Why Next.js + React frontend?**  
+- Researched: Assessed framework popularity, SSR/CSR flexibility, TailwindCSS integration  
+- Decision: Next.js with React 18 chosen for rapid prototyping, responsive design, and easy Vercel deployment  
+- Source: Next.js docs, React community benchmarks  
+
 
 ### B. User Interview Notes Summary
 
