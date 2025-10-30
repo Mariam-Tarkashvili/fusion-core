@@ -18,7 +18,7 @@
 | Timeline               | **Realistic**    | Adjusted milestones based on 3-week sprint schedule and current development velocity.                            |
 ---
 
-##1. Problem Statement
+## 1. Problem Statement
 **Original Version**
 
 Patients prescribed new medications face a critical comprehension gap when trying to understand their medication information. Package inserts and drug information sheets are written in dense medical jargon at a college reading level, making them inaccessible to the many adults who read at an 8th-grade level or below. This leads to medication misuse, anxiety, and non-adherence.
