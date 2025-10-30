@@ -5,12 +5,12 @@
 
 ## Team Members
 
-|Name|Email|GitHub Username|
-|---|---|---|
-|Mariam Tarkashvili|tarkashvili.mariam@kiu.edu.ge|Mariam-Tarkashvili|
-|Giorgi Ksovreli|ksovreli.giorgi@kiu.edu.ge|giorgi-ksovreli|
-|Saba Samkharadze|samkharadze.saba@kiu.edu.ge|ssmass909|
-|Tekla Chaphidze|chaphidze.tekla@kiu.edu.ge|TeklaChaphidze|
+| Name               | Email                         | GitHub Username    |
+| ------------------ | ----------------------------- | ------------------ |
+| Mariam Tarkashvili | tarkashvili.mariam@kiu.edu.ge | Mariam-Tarkashvili |
+| Giorgi Ksovreli    | ksovreli.giorgi@kiu.edu.ge    | giorgi-ksovreli    |
+| Saba Samkharadze   | samkharadze.saba@kiu.edu.ge   | ssmass909          |
+| Tekla Chaphidze    | chaphidze.tekla@kiu.edu.ge    | TeklaChaphidze     |
 
 ---
 
@@ -75,7 +75,7 @@ We will explore and iteratively develop features and artifacts that demonstrate 
 
 All team members are equally responsible for:
 
-- Attending weekly team meetings on Monday/Wednesday at 20:00
+- Attending weekly team meetings
 - Completing assigned tasks on time and communicating blockers early
 - Code reviews and testing (each PR requires at least one approval)
 - Documentation updates (README, API docs, inline comments)
@@ -94,9 +94,9 @@ All team members are equally responsible for:
 
 **Regular Team Meetings:**
 
-- **Frequency:** Twice every week
-- **Days/Times:** Monday 20:00 and Wednesday 20:00
-- **Duration:** 1 hour (30 min standup + 30 min planning/problem-solving)
+- **Frequency:** 1-2 times per week
+- **Days/Times:** Dynamic Schedule
+- **Duration:** Dynamic Duration
 - **Location/Platform:** Google Meet: https://meet.google.com/ftu-ppwb-dyi
 
 **Meeting Norms:**
