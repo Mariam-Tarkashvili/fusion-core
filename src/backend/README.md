@@ -19,7 +19,7 @@ A Python Flask backend API for the Medsplain medication intelligence application
 ### 1. Create a Virtual Environment
 
 ```bash
-cd backend
+cd src/backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
