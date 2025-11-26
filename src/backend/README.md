@@ -59,6 +59,7 @@ GEMINI_MODEL=gemini-2.5-flash
 ### 4. Run the Server
 
 ```bash
+cd ..
 python -m backend.app.api
 ```
 
