@@ -67,7 +67,7 @@ Located in: `course-pack/labs/lab-6/`
 - [ ] Contains: Logs, screenshots, performance data, validation results
 
 ### README Update
-- [ ] README links to design review: [Direct link to README section] !!!აქ თქვენ უნდა მიუთითოთ design review ლინკი.
+- [ ] README links to design review: [Direct link to README section] !!!აქ თქვენ უნდა მიუთითოთ design review ლინკი და Root დირექტორიაში მთავარი რიდმი რომ არის, იმას მიამატეთ design review ს აღწერა.  (ეს ქართული ტექსტი წაშალეთ დდდ)
 - [ ] README notes architectural changes (if any): ✅ Yes
 
 ---
