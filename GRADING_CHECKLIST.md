@@ -52,7 +52,7 @@ Located in: `course-pack/labs/lab-6/`
 ### Main Documents
 - [ ] Design Review Document: `docs/design-review-week7.md` - [Direct link]
 - [ ] Event Schemas: `docs/event-schemas.md` - [Direct link]
-- [ ] Updated Architecture Diagram: `docs/architecture-week7.[png/pdf]` - [Direct link]
+- [ ] Updated Architecture Diagram: `docs/architecture-week7.[png/pdf]` - https://github.com/Mariam-Tarkashvili/fusion-core/blob/main/docs/architecture-week7.png
 
 ### Design Review Sections Completed (check all 6)
 - [ ] Section 1: Architecture Validation (1-2 pages)
@@ -67,25 +67,9 @@ Located in: `course-pack/labs/lab-6/`
 - [ ] Contains: Logs, screenshots, performance data, validation results
 
 ### README Update
-- [ ] README links to design review: [Direct link to README section]
-- [ ] README notes architectural changes (if any): ✅ Yes / ❌ No changes
+- [ ] README links to design review: [Direct link to README section] !!!აქ თქვენ უნდა მიუთითოთ design review ლინკი.
+- [ ] README notes architectural changes (if any): ✅ Yes
 
 ---
 
-## Part A: Week 6 - Function Calling Implementation (110 points)
 
-By the end of Week 6, your capstone must demonstrate working function calling with proper validation, error handling, and integration.
-
-### 1. Function Implementations (40 points)
-
-Create **2–3 functions** that are specific to your project and integrate them into your capstone. Each function must have clearly defined inputs and outputs, validated with Pydantic.
-
-**Requirements:**
-- ✅ Functions are specific to your project (not generic examples)
-- ✅ Located in your capstone repository (not in lab folders)
-- ✅ Pydantic models defined for all inputs and outputs
-- ✅ JSON schemas correctly defined for the LLM
-- ✅ Functions execute without errors (mock data OK for Week 6)
-- ✅ AI successfully calls your functions in conversations
-
-**Recommended File Structure:**
