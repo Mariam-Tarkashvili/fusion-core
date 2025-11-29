@@ -211,7 +211,92 @@ This week implements the RAG-powered medication intelligence backend with functi
 
 ---
 
-## 📘 Notes for Graders
+# Architecture Week 7
+
+This architecture describes how the backend system processes medication-related queries using Function Calling, RAG, and external APIs such as OpenFDA and Gemini. The flowchart visualizes how requests move through each layer.
+
+---
+
+## 🔹 High-Level Overview
+
+The system follows a structured pipeline:
+
+### 1. React Frontend
+The user interacts with the interface and submits queries (e.g., "What does ibuprofen do?").
+
+### 2. Flask API (`api.py`)
+Receives HTTP requests and routes them to the correct operation:
+- `/api/medication-info`
+- `/api/check-interactions`
+- `/api/explain`
+- `/api/feedback`
+
+### 3. Functions Layer (`functions.py`)
+The API does not contain logic. Instead, it calls one of your four main functions:
+- `get_medication_info`
+- `check_multiple_interactions`
+- `generate_explanation`
+- `submit_feedback`
+
+These functions contain:
+- type hints
+- docstrings
+- structured error handling
+- return values that match Week 6–7 function calling requirements
+
+### 4. Pydantic Models (`models.py`)
+Used for:
+- validating inputs
+- validating outputs
+- enforcing a consistent schema for Gemini function-calling
+
+### 5. RAG Service (`rag_service.py`)
+Central component that retrieves medication data. Responsibilities:
+- querying OpenFDA
+- normalizing the result
+- merging multiple sources
+- preparing context for Gemini
+
+### 6. External APIs
+- **OpenFDA** → official drug data
+- **Gemini** → natural language explanations, reasoning, summarization
+
+### 7. Response Back to the User
+After processing, the system returns:
+- medication information
+- side effects
+- safety warnings
+- interaction analysis
+- human-friendly explanations
+
+---
+
+## 🔹 Request Flow Summary
+```
+User → React → Flask API → Functions Layer → RAG Service → OpenFDA/Gemini → Response
+```
+
+Each layer has one job:
+- **Frontend:** Interface
+- **API:** Routing
+- **Functions:** Logic
+- **RAG:** Information retrieval
+- **OpenFDA:** Official medicine data
+- **Gemini:** Language and reasoning
+
+---
+
+## 🔹 Why This Architecture Works Well
+
+- **Modular** — every file has a single responsibility
+- **Extendable** — new functions can be added without touching the API
+- **Safe** — error handling prevents API crashes
+- **RAG-ready** — explanations use real medical data (OpenFDA)
+- **AI-compatible** — Gemini function-calling produces structured responses
+  
+---
+
+## 📘 Notes for Grader
 
 - The upadte of this README.md hasn't been requested until now, so the previous part was created in week 1-2
 - The backend uses **RAG via OpenFDA** + **AI reasoning via Gemini function calling**.
