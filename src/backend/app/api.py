@@ -4,6 +4,7 @@ import json
 import requests
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
+from flask_cors import CORS
 
 load_dotenv()  # reads .env (if present)
 
@@ -19,6 +20,7 @@ from .models import (
 from . import functions as funcs
 
 app = Flask(__name__)
+CORS(app, origins=["http://localhost:5173", "http://localhost:8080"], supports_credentials=True)
 
 # Config from env
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")

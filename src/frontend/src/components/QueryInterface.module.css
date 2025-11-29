@@ -1,0 +1,36 @@
+.container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.searchBox {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.examplesSection {
+  margin-top: 24px;
+}
+
+.chipContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.exampleChip {
+  transition: background-color 0.2s ease;
+}
+
+.exampleChip:hover {
+  background-color: rgba(37, 99, 235, 0.08);
+}
+
+@media (max-width: 768px) {
+  .searchBox {
+    flex-direction: column;
+  }
+}

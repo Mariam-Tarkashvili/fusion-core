@@ -1,0 +1,17 @@
+.container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 32px auto 0;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.badges {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}

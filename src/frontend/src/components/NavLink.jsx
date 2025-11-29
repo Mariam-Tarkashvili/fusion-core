@@ -1,18 +1,22 @@
-import { Link, useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Link } from "@mui/material";
 
-const NavLink = ({ to, children, className, ...props }) => {
+const NavLink = ({ to, children, ...props }) => {
   const location = useLocation();
   const isActive = location.pathname === to;
 
   return (
     <Link
+      component={RouterLink}
       to={to}
-      className={cn(
-        "transition-colors hover:text-foreground/80",
-        isActive ? "text-foreground" : "text-foreground/60",
-        className
-      )}
+      sx={{
+        color: isActive ? 'primary.main' : 'text.secondary',
+        textDecoration: 'none',
+        transition: 'color 0.2s',
+        '&:hover': {
+          color: 'primary.main',
+        }
+      }}
       {...props}
     >
       {children}
