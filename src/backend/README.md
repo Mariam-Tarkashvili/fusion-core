@@ -19,7 +19,6 @@ A Python Flask backend API for the Medsplain medication intelligence application
 ### 1. Create a Virtual Environment
 
 ```bash
-cd src/backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
@@ -59,11 +58,11 @@ GEMINI_MODEL=gemini-2.5-flash
 ### 4. Run the Server
 
 ```bash
-cd ..
+cd src
 python -m backend.app.api
 ```
 
-The server will start on `http://localhost:5000`
+The server will start on `http://127.0.0.1:5000`
 
 You should see:
 ```
@@ -93,23 +92,29 @@ POST /api/medication-info
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": {
-    "generic_name": "ibuprofen",
-    "brand_names": ["Advil", "Motrin"],
-    "drug_class": "NSAID",
-    "uses": ["Pain relief", "Fever reduction"],
-    "common_dosage": "200–800 mg every 4–6 hours",
-    "side_effects": ["Dyspepsia", "Nausea", "Dizziness"],
-    "warnings": ["Avoid with other NSAIDs"],
-    "interactions": [
-      {
-        "with": "warfarin",
-        "severity": "moderate",
-        "note": "Bleeding risk; monitor closely"
-      }
-    ]
-  }
+    "data": {
+        "brand_names": [
+            "Ibuprofen Dye Free"
+        ],
+        "common_dosage": "Directions do not take more than directed the smallest effective dose should be used adults and children 12 years and over: take 1 tablet every 4 to 6 hours while symptoms persist if pain or fever does not respond to 1 tablet, 2 tablets may be used do not exceed 6 tablets in 24 hours, unless directed by a doctor children under 12 years: ask a doctor",
+        "drug_class": "Nonsteroidal Anti-inflammatory Drug [EPC]",
+        "generic_name": "IBUPROFEN",
+        "side_effects": [],
+        "sources": [
+            {
+                "name": "OpenFDA Drug Labels",
+                "type": "FDA",
+                "url": "https://open.fda.gov/apis/drug/label/"
+            }
+        ],
+        "uses": [
+            "Uses temporarily relieves minor aches and pains due to: headache toothache backache menstrual cramps the common cold muscular aches minor pain of arthritis temporarily reduces fever"
+        ],
+        "warnings": [
+            "Warnings Allergy alert: Ibuprofen may cause a severe allergic reaction, especially in people allergic to aspirin. Symptoms may include: rash facial swelling asthma (wheezing) hives skin reddening shock blisters If an allergic reaction occurs, stop use and seek medical help right away. Stomach bleeding warning: This product contains an NSAID, which may cause severe stomach bleeding. The chance is higher if you: take more or for a longer time than directed take a blood thinning (anticoagulant) or "
+        ]
+    },
+    "status": "success"
 }
 ```
 
@@ -130,22 +135,33 @@ POST /api/check-interactions
 **Response:**
 ```json
 {
-  "status": "success",
-  "data": {
-    "medications": ["aspirin", "warfarin", "ibuprofen"],
-    "pairs_evaluated": 3,
-    "total_interactions": 2,
-    "interactions": [
-      {
-        "drug1": "aspirin",
-        "drug2": "warfarin",
-        "severity": "major",
-        "description": "Increases bleeding risk",
-        "recommendation": "Avoid combination or co-manage with INR monitoring"
-      }
-    ],
-    "message": "Checked 3 medications across 3 pairs."
-  }
+    "data": {
+        "interactions": [
+            {
+                "description": "No drug-drug interaction information found for warfarin + ababhudbvuwd in OpenFDA labels.",
+                "drug1": "warfarin",
+                "drug2": "ababhudbvuwd",
+                "recommendation": "No specific interaction data available; consult a healthcare provider if concerned.",
+                "severity": "unknown",
+                "source": "OpenFDA"
+            }
+        ],
+        "medications": [
+            "warfarin",
+            "ababhudbvuwd"
+        ],
+        "message": "No drug-drug interaction information found for the provided medications in OpenFDA labels.",
+        "pairs_evaluated": 1,
+        "sources": [
+            {
+                "name": "OpenFDA Drug Labels",
+                "type": "FDA",
+                "url": "https://open.fda.gov/apis/drug/label/"
+            }
+        ],
+        "total_interactions": 0
+    },
+    "status": "success"
 }
 ```
 
@@ -196,8 +212,7 @@ POST /api/log-query
 **Request Body:**
 ```json
 {
-  "user_id": "anon_user123",
-  "medications": ["aspirin", "warfarin"],
+  "medications": ["warfarin", "aspirin"],
   "interactions_found": 1,
   "severity_level": "major"
 }
@@ -206,13 +221,98 @@ POST /api/log-query
 **Response:**
 ```json
 {
-  "status": "success",
-  "log_id": "log_abc123xyz",
-  "message": "Query logged successfully."
+  "log_id": "log_78fa7852e0a0",
+  "message": "Query logged successfully.",
+  "status": "success"
 }
 ```
 
 ---
+
+### 5. Explain in Simple Words
+```http
+POST /api/explain
+```
+
+**Request Body:**
+```json
+{
+    "medication_name": "ibuprofen"
+}
+```
+
+**Response:**
+```json
+{
+    "data": {
+        "explanation": "Ibuprofen, sometimes sold as Ibuprofen Dye Free, is a type of medicine called a nonsteroidal anti-inflammatory drug, or NSAID for short. It's used to temporarily relieve minor aches and pains. Think of it as a pain reliever and fever reducer. It can help with things like headaches, toothaches, backaches, menstrual cramps, muscle aches, and even the pain you might get from a cold or minor arthritis.\n\nTo take ibuprofen safely, it's important to follow the directions on the label. Don't take more than you need, and use the lowest dose that works for you. For adults and kids 12 and older, you can take 1 tablet every 4 to 6 hours as long as you still have symptoms. If one tablet isn't enough, you can take two, but don't take more than 6 tablets in a 24-hour period unless your doctor tells you to. For children under 12, it's best to ask a doctor before giving them ibuprofen.\n\nLike all medicines, ibuprofen can have side effects and warnings. Some people might have an allergic reaction, especially if they're allergic to aspirin. Signs of an allergic reaction include rash, facial swelling, wheezing, hives, skin redness, blisters, or even shock. If you have any of these symptoms, stop taking ibuprofen and get medical help right away.\n\nAnother important warning is about stomach bleeding. Ibuprofen can cause serious stomach bleeding, especially if you take too much, take it for too long, or if you're also taking a blood thinner. If you have any concerns about these risks, talk to your doctor or pharmacist before taking ibuprofen.\n",
+        "medication_name": "ibuprofen",
+        "reading_level": 7.3,
+        "reading_level_description": "Easy to read (middle school)",
+        "retrieved_data": {
+            "brand_names": [
+                "Ibuprofen Dye Free"
+            ],
+            "dosage": "Directions do not take more than directed the smallest effective dose should be used adults and children 12 years and over: take 1 tablet every 4 to 6 hours while symptoms persist if pain or fever does not respond to 1 tablet, 2 tablets may be used do not exceed 6 tablets in 24 hours, unless directed by a doctor children under 12 years: ask a doctor",
+            "drug_class": "Nonsteroidal Anti-inflammatory Drug [EPC]",
+            "found": true,
+            "generic_name": "IBUPROFEN",
+            "interactions": [],
+            "side_effects": [],
+            "sources": [
+                {
+                    "name": "OpenFDA Drug Labels",
+                    "type": "FDA",
+                    "url": "https://open.fda.gov/apis/drug/label/"
+                }
+            ],
+            "uses": [
+                "Uses temporarily relieves minor aches and pains due to: headache toothache backache menstrual cramps the common cold muscular aches minor pain of arthritis temporarily reduces fever"
+            ],
+            "warnings": [
+                "Warnings Allergy alert: Ibuprofen may cause a severe allergic reaction, especially in people allergic to aspirin. Symptoms may include: rash facial swelling asthma (wheezing) hives skin reddening shock blisters If an allergic reaction occurs, stop use and seek medical help right away. Stomach bleeding warning: This product contains an NSAID, which may cause severe stomach bleeding. The chance is higher if you: take more or for a longer time than directed take a blood thinning (anticoagulant) or "
+            ]
+        },
+        "sources": [
+            {
+                "name": "OpenFDA Drug Labels",
+                "type": "FDA",
+                "url": "https://open.fda.gov/apis/drug/label/"
+            }
+        ]
+    },
+    "status": "success"
+}
+```
+
+---
+
+
+### 6. Feedback 
+```http
+POST /api/feedback
+```
+
+**Request Body:**
+```json
+{
+    "explanation_id" : "5",
+    "feedback_type" : "helpful", (აქ მარტო "unclear" ან "helpful" მოსულა თორე 400-ს დაარტყამს)
+    "comment" : "good"
+}
+```
+
+**Response:**
+```json
+{
+    "feedback_id": "fb_aa84912bccf0",
+    "message": "Feedback submitted successfully.",
+    "status": "success"
+}
+```
+
+---
+
 
 ## Testing with Postman / cURL
 

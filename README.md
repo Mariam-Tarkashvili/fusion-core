@@ -1,80 +1,305 @@
-🚀 Fusion Core
+# 🚀 Fusion Core
 
-built for Building AI‑Powered Applications course
+**Built for Building AI‑Powered Applications course**
 
-👥 Team Members
+## 👥 Team Members
+- Mariam Tarkashvili
+- Tekla Chapidze
+- Saba Samkharadze
+- Akaki Ghachava
+- Giorgi Ksovreli
+  
 
-Mariam Tarkashvili
+---
 
-Saba Samkharadze
+## 📘 Project Overview
 
-Giorgi Ksovreli
-
-📘 Project Overview
-
-Fusion Core is an AI-driven platform designed to bridge innovation and intelligence — combining data, automation, and user-centric design to solve real-world problems through advanced AI models and intuitive interfaces.
+**Fusion Core** is an AI-driven platform designed to bridge innovation and intelligence — combining data, automation, and user-centric design to solve real-world problems through advanced AI models and intuitive interfaces.
 
 This repository serves as the central workspace for our capstone project, containing all documentation, source code, research, and collaborative artifacts.
 
-🧩 Repository Structure
+---
+
+## 🧩 Repository Structure
 ```bash
 FusionCore/
 │
-├── docs/                 # Research, proposal, and documentation
-├── src/                  # Application source code
-│   ├── backend/          # APIs, AI models, and services
-│   └── frontend/         # Web or mobile UI components
+├── docs/              # Research, proposal, and documentation
+├── src/               # Application source code
+│   ├── backend/       # APIs, AI models, and services
+│   └── frontend/      # Web or mobile UI components
 │
-├── data/                 # Datasets and preprocessing scripts
+├── data/              # Datasets and preprocessing scripts
 │
-├── notebooks/            # Jupyter notebooks for experiments and analysis
+├── notebooks/         # Jupyter notebooks for experiments and analysis
 │
-├── tests/                # Unit and integration tests
+├── tests/             # Unit and integration tests
 │
 ├── .gitignore
 ├── LICENSE
 └── README.md
 ```
-🎯 Week 2 Deliverable: Capstone Proposal
-Contents
 
-Problem Statement: What problem we aim to solve and why it matters
+---
 
-Target Users: Who benefits and their core pain points
+## 🎯 Week 2 Deliverable: Capstone Proposal
 
-Success Criteria: How we’ll measure impact and effectiveness
+### Contents
+- **Problem Statement:** What problem we aim to solve and why it matters
+- **Target Users:** Who benefits and their core pain points
+- **Success Criteria:** How we'll measure impact and effectiveness
+- **Technical Architecture:** Preliminary system design and components
+- **Risk Assessment:** Anticipated challenges and mitigation strategies
+- **Research Plan:** Key learning goals and experimental directions
+- **User Study Plan:** Approach to collecting and analyzing user feedback
+- **Team Contract:** Roles, responsibilities, and collaboration norms
+- **IRB Light Checklist:** Compliance for user research
 
-Technical Architecture: Preliminary system design and components
+---
 
-Risk Assessment: Anticipated challenges and mitigation strategies
+## ⚙️ Team Workflow
 
-Research Plan: Key learning goals and experimental directions
+- **Version Control:** GitHub (feature branches + pull requests)
+- **Communication:** GitHub Issues, Discussions, and weekly meetings
+- **Task Management:** Milestones and GitHub Projects
+- **Conflict Resolution:** Consensus-based, escalating to instructor if needed
 
-User Study Plan: Approach to collecting and analyzing user feedback
+---
 
-Team Contract: Roles, responsibilities, and collaboration norms
-
-IRB Light Checklist: Compliance for user research
-
-⚙️ Team Workflow
-
-Version Control: GitHub (feature branches + pull requests)
-
-Communication: GitHub Issues, Discussions, and weekly meetings
-
-Task Management: Milestones and GitHub Projects
-
-Conflict Resolution: Consensus-based, escalating to instructor if needed
-
-🧠 Vision Statement
+## 🧠 Vision Statement
 
 Our goal is to create a meaningful, scalable AI solution that enhances real-world decision-making and delivers measurable value to users through intelligent automation, human-centered design, and transparent AI practices.
 
-📅 Timeline
+---
 
-Week 2: Team formation & Capstone Proposal submission
-Future Weeks: Iterative development, model training, user testing, and final demo
+## 📅 Timeline
 
-📄 License
+- **Week 2:** Team formation & Capstone Proposal submission
+- **Future Weeks:** Iterative development, model training, user testing, and final demo
 
-This project is part of an academic course and follows the institution’s collaboration and academic honesty guidelines.
+---
+
+## 📄 License
+
+This project is part of an academic course and follows the institution's collaboration and academic honesty guidelines.
+
+---
+
+## 📅 Week 6: Function Calling Implementation
+
+This week implements the RAG-powered medication intelligence backend with function calling support for Gemini. Below is the required documentation of all backend functions, their inputs, outputs, and use cases.
+
+---
+
+## 🧩 Implemented Functions (Backend: `functions.py`)
+
+### 1. `get_medication_info`
+
+**Input:**
+- `medication_name: str`
+- `include_interactions: bool` (optional)
+- `include_side_effects: bool` (optional)
+
+**Output:**
+```json
+{
+  "status": "success" | "error",
+  "data": { ... } // medication details
+}
+```
+
+**Use Case:** Retrieves medication data using RAG (OpenFDA) — drug class, uses, dosage, warnings, side effects, interactions (optional).
+
+---
+
+### 2. `check_multiple_interactions`
+
+**Input:**
+- `medications: List[str]` (2–5 items)
+
+**Output:**
+```json
+{
+  "status": "success",
+  "data": {
+    "medications": [...],
+    "total_interactions": number,
+    "interactions": [...],
+    "sources": [...]
+  }
+}
+```
+
+**Use Case:** Evaluates drug-drug interactions using OpenFDA labels. Handles invalid inputs and missing data with clear messages.
+
+---
+
+### 3. `generate_explanation`
+
+**Input:**
+- `medication_name: str`
+
+**Output:**
+```json
+{
+  "status": "success" | "error",
+  "data": {
+    "explanation": str,
+    "reading_level": float,
+    "sources": [...],
+    "retrieved_data": {...}
+  }
+}
+```
+
+**Use Case:** Produces a plain-language explanation using OpenFDA + Gemini. Includes readability scoring and citations.
+
+**Error Handling:** Returns error if `GEMINI_API_KEY` is missing (preventing hard-coded secrets).
+
+---
+
+### 4. `log_interaction_query`
+
+**Input:**
+- `medications: List[str]`
+- `interactions_found: int`
+- `severity_level: str`
+- `timestamp` (optional)
+
+**Output:**
+```json
+{
+  "status": "success",
+  "log_id": "log_xxx",
+  "message": "Query logged successfully."
+}
+```
+
+**Use Case:** Minimal in-memory interaction logging used for analytics and later database expansion.
+
+---
+
+### 5. `submit_feedback`
+
+**Input:**
+- `explanation_id: str`
+- `user_id: str`
+- `feedback_type: str` (helpful or unclear)
+- `comment: str` (optional)
+
+**Output:**
+```json
+{
+  "status": "success",
+  "feedback_id": "fb_xxx"
+}
+```
+
+**Use Case:** Captures user feedback on explanations to improve future model outputs.
+
+---
+
+## 🧪 Code Quality & Documentation Checklist
+
+| Requirement | Status |
+|------------|--------|
+| README updated with Week 6 section | ✅ Done |
+| Docstrings on all functions | ✔️ Yes (all functions documented) |
+| Type hints present | ✔️ Yes |
+| Error handling | ✔️ Implemented (no API key, not found, invalid input) |
+| No hard-coded API keys | ✔️ Uses environment variables (`GEMINI_API_KEY`) |
+
+---
+
+# Architecture Week 7
+
+This architecture describes how the backend system processes medication-related queries using Function Calling, RAG, and external APIs such as OpenFDA and Gemini. The flowchart visualizes how requests move through each layer.
+
+---
+
+## 🔹 High-Level Overview
+
+The system follows a structured pipeline:
+
+### 1. React Frontend
+The user interacts with the interface and submits queries (e.g., "What does ibuprofen do?").
+
+### 2. Flask API (`api.py`)
+Receives HTTP requests and routes them to the correct operation:
+- `/api/medication-info`
+- `/api/check-interactions`
+- `/api/explain`
+- `/api/feedback`
+
+### 3. Functions Layer (`functions.py`)
+The API does not contain logic. Instead, it calls one of your four main functions:
+- `get_medication_info`
+- `check_multiple_interactions`
+- `generate_explanation`
+- `submit_feedback`
+
+These functions contain:
+- type hints
+- docstrings
+- structured error handling
+- return values that match Week 6–7 function calling requirements
+
+### 4. Pydantic Models (`models.py`)
+Used for:
+- validating inputs
+- validating outputs
+- enforcing a consistent schema for Gemini function-calling
+
+### 5. RAG Service (`rag_service.py`)
+Central component that retrieves medication data. Responsibilities:
+- querying OpenFDA
+- normalizing the result
+- merging multiple sources
+- preparing context for Gemini
+
+### 6. External APIs
+- **OpenFDA** → official drug data
+- **Gemini** → natural language explanations, reasoning, summarization
+
+### 7. Response Back to the User
+After processing, the system returns:
+- medication information
+- side effects
+- safety warnings
+- interaction analysis
+- human-friendly explanations
+
+---
+
+## 🔹 Request Flow Summary
+```
+User → React → Flask API → Functions Layer → RAG Service → OpenFDA/Gemini → Response
+```
+
+Each layer has one job:
+- **Frontend:** Interface
+- **API:** Routing
+- **Functions:** Logic
+- **RAG:** Information retrieval
+- **OpenFDA:** Official medicine data
+- **Gemini:** Language and reasoning
+
+---
+
+## 🔹 Why This Architecture Works Well
+
+- **Modular** — every file has a single responsibility
+- **Extendable** — new functions can be added without touching the API
+- **Safe** — error handling prevents API crashes
+- **RAG-ready** — explanations use real medical data (OpenFDA)
+- **AI-compatible** — Gemini function-calling produces structured responses
+  
+---
+
+## 📘 Notes for Grader
+
+- The upadte of this README.md hasn't been requested until now, so the previous part was created in week 1-2
+- The backend uses **RAG via OpenFDA** + **AI reasoning via Gemini function calling**.
+- All functions return **structured, predictable JSON** for reliability.
+- Validation is enforced using **Pydantic models** (in `models.py`).
+- All secrets are managed via `.env` and **never committed to Git**.

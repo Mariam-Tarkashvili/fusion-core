@@ -1,4 +1,3 @@
-# backend/app/models.py
 from __future__ import annotations
 from pydantic import BaseModel, Field, constr
 from typing import List, Optional, Literal
@@ -14,7 +13,7 @@ class CheckInteractionsRequest(BaseModel):
     )
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {"medications": ["aspirin", "ibuprofen", "warfarin"]}
         }
 
@@ -24,19 +23,17 @@ class GetMedicationInfoRequest(BaseModel):
     include_side_effects: bool = Field(True, description="Include common side effects.")
 
     class Config:
-        schema_extra = {"example": {"medication_name": "ibuprofen", "include_interactions": True}}
+        json_schema_extra = {"example": {"medication_name": "ibuprofen", "include_interactions": True}}
 
 class LogInteractionQueryRequest(BaseModel):
-    user_id: constr(strip_whitespace=True, min_length=3, max_length=40) = Field(..., description="Anonymous, non-PII user identifier.")
     medications: List[constr(strip_whitespace=True, min_length=1)] = Field(..., description="Medications that were checked.")
     interactions_found: int = Field(..., ge=0)
     severity_level: Literal["none", "minor", "moderate", "major", "critical"] = Field("none")
-    timestamp: Optional[datetime] = Field(None, description="ISO 8601; server will default to now if omitted.")
+    timestamp: Optional[datetime] = Field(None, description="Server will default to now if omitted.")
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
-                "user_id": "anon_123",
                 "medications": ["warfarin", "aspirin"],
                 "interactions_found": 1,
                 "severity_level": "major"
@@ -95,6 +92,8 @@ class LogInteractionQueryResponse(BaseModel):
     status: Literal["success", "error"]
     log_id: Optional[str] = None
     message: Optional[str] = None
+
+
 
 class ErrorResponse(BaseModel):
     status: Literal["error"] = "error"
