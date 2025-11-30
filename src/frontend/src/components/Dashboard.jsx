@@ -7,7 +7,7 @@ import QueryInterface from "@/components/QueryInterface";
 import ExplanationDisplay from "@/components/ExplanationDisplay";
 import InteractionChecker from "@/components/InteractionChecker";
 import ChatInterface from "@/components/ChatInterface";
-import medicationStore from "@/stores/MedicationStore";
+import { medicationStore } from "@/stores/MedicationStore";
 import { useSnackbar } from "notistack";
 
 const Dashboard = () => {

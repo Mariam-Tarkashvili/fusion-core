@@ -1,4 +1,5 @@
 // ExplanationDisplay.jsx - Polished Visual Design
+import React from "react";
 import { useState } from "react";
 import {
   Card,
@@ -38,6 +39,7 @@ const ExplanationDisplay = ({
 }) => {
   const [feedback, setFeedback] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
+  const safeScore = readabilityScore && typeof readabilityScore === 'object' ? readabilityScore : { grade: 6, level: 'Elementary School' };
 
   const handleFeedback = async (type) => {
     setFeedback(type);
@@ -98,7 +100,7 @@ const ExplanationDisplay = ({
           </Stack>
           <Stack direction="row" spacing={1}>
             <Chip
-              label={`Reading Level: Grade ${readabilityScore.grade}`}
+              label={`Reading Level: Grade ${safeScore.grade}`}
               sx={{
                 bgcolor: "rgba(255,255,255,0.25)",
                 color: "white",
@@ -108,7 +110,7 @@ const ExplanationDisplay = ({
               size="small"
             />
             <Chip
-              label={readabilityScore.level}
+              label={safeScore.level}
               sx={{
                 bgcolor: "rgba(255,255,255,0.25)",
                 color: "white",

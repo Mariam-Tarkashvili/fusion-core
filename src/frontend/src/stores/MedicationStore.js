@@ -321,4 +321,8 @@ class MedicationStore {
 
 // Create singleton instance
 const medicationStore = new MedicationStore();
-export default medicationStore;
+
+// Export the class as default (so tests can `new MedicationStore()`),
+// and export the singleton for application runtime imports.
+export default MedicationStore;
+export { medicationStore };

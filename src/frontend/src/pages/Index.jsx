@@ -1,3 +1,4 @@
+import React from "react";
 import { observer } from "mobx-react";
 import { useState } from "react";
 import {
@@ -19,7 +20,7 @@ import {
 } from "@mui/material";
 import { Search, Add, Clear, Send, Science, ChatBubbleOutline, WarningAmber } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
-import medicationStore from "../stores/MedicationStore";
+import { medicationStore } from "../stores/MedicationStore";
 
 // Enhanced Hero Component
 const Hero = ({ onGetStarted }) => (
