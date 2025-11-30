@@ -78,31 +78,40 @@ class MedicationStore {
       const medData = data.data;
 
       runInAction(() => {
+        // Safely access arrays with fallbacks
+        const uses = Array.isArray(medData.uses) ? medData.uses : [];
+        const warnings = Array.isArray(medData.warnings) ? medData.warnings : [];
+        const interactions = Array.isArray(medData.interactions) ? medData.interactions : [];
+        const sideEffects = Array.isArray(medData.side_effects) ? medData.side_effects : [];
+        const brandNames = Array.isArray(medData.brand_names) ? medData.brand_names : [];
+
         // Transform API response to match ExplanationDisplay expectations
         this.explanation = {
-          medicationName: medData.generic_name,
-          brandNames: medData.brand_names,
-          drugClass: medData.drug_class,
-          explanation: `${medData.generic_name} is a ${medData.drug_class} medication. ${medData.uses.join(
-            ". "
-          )}. Common dosage: ${medData.common_dosage}.`,
+          medicationName: medData.generic_name || medicationName,
+          brandNames: brandNames,
+          drugClass: medData.drug_class || "Unknown",
+          explanation: `${medData.generic_name || medicationName} is a ${
+            medData.drug_class || "medication"
+          }. ${uses.join(". ")}${uses.length > 0 ? "." : ""} ${
+            medData.common_dosage ? `Common dosage: ${medData.common_dosage}.` : ""
+          }`,
           keyPoints: [
-            `Drug Class: ${medData.drug_class}`,
-            `Common Uses: ${medData.uses.join(", ")}`,
-            `Dosage: ${medData.common_dosage}`,
-            ...medData.warnings.map((w) => `⚠️ ${w}`),
+            `Drug Class: ${medData.drug_class || "Unknown"}`,
+            uses.length > 0 ? `Common Uses: ${uses.join(", ")}` : "Uses: Not specified",
+            medData.common_dosage ? `Dosage: ${medData.common_dosage}` : "Dosage: Consult healthcare provider",
+            ...warnings.map((w) => `⚠️ ${w}`),
           ],
           readabilityScore: {
             grade: 6,
             level: "Elementary School",
           },
-          sources: medData.interactions.map((int) => ({
-            name: `Interaction with ${int.with}`,
-            snippet: `${int.severity.toUpperCase()}: ${int.note}`,
+          sources: interactions.map((int) => ({
+            name: `Interaction with ${int.with || "Unknown"}`,
+            snippet: `${(int.severity || "unknown").toUpperCase()}: ${int.note || "No details available"}`,
           })),
-          sideEffects: medData.side_effects,
-          warnings: medData.warnings,
-          interactions: medData.interactions,
+          sideEffects: sideEffects,
+          warnings: warnings,
+          interactions: interactions,
         };
         this.isLoading = false;
       });
@@ -208,20 +217,26 @@ class MedicationStore {
             const resultData = data.result.data;
             let resultText = "";
 
-            if (resultData.interactions) {
+            if (resultData.interactions && Array.isArray(resultData.interactions)) {
               // Interaction check result
-              resultText = `Found ${resultData.total_interactions} interaction(s) among ${resultData.medications.join(
-                ", "
-              )}.\n\n`;
+              resultText = `Found ${resultData.total_interactions || 0} interaction(s) among ${
+                Array.isArray(resultData.medications) ? resultData.medications.join(", ") : "medications"
+              }.\n\n`;
               resultData.interactions.forEach((int) => {
-                resultText += `⚠️ ${int.drug1} + ${int.drug2} (${int.severity}):\n${int.description}\nRecommendation: ${int.recommendation}\n\n`;
+                resultText += `⚠️ ${int.drug1 || "Drug 1"} + ${int.drug2 || "Drug 2"} (${
+                  int.severity || "unknown"
+                }):\n${int.description || "No description"}\nRecommendation: ${
+                  int.recommendation || "Consult healthcare provider"
+                }\n\n`;
               });
             } else if (resultData.generic_name) {
               // Medication info result
-              resultText = `**${resultData.generic_name}** (${resultData.drug_class})\n\n`;
-              resultText += `Uses: ${resultData.uses.join(", ")}\n`;
-              resultText += `Dosage: ${resultData.common_dosage}\n\n`;
-              resultText += `Side Effects: ${resultData.side_effects.join(", ")}`;
+              resultText = `**${resultData.generic_name}** (${resultData.drug_class || "Unknown class"})\n\n`;
+              resultText += `Uses: ${Array.isArray(resultData.uses) ? resultData.uses.join(", ") : "Not specified"}\n`;
+              resultText += `Dosage: ${resultData.common_dosage || "Consult healthcare provider"}\n\n`;
+              resultText += `Side Effects: ${
+                Array.isArray(resultData.side_effects) ? resultData.side_effects.join(", ") : "Not specified"
+              }`;
             }
 
             this.chatHistory.push({
