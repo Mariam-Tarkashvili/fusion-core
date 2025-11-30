@@ -51,7 +51,7 @@ Located in: `course-pack/labs/lab-6/`
 
 ### Main Documents
 - [ ] Design Review Document: `docs/design-review-week7.md` - [Direct link]
-- [ ] Event Schemas: `docs/event-schemas.md` - [Direct link]
+- [ ] Event Schemas: `docs/event-schemas.md` - [[Direct link](https://github.com/Mariam-Tarkashvili/fusion-core/blob/main/docs/event-schemas.md)]
 - [ ] Updated Architecture Diagram: `docs/architecture-week7.[png/pdf]` - https://github.com/Mariam-Tarkashvili/fusion-core/blob/main/docs/architecture-week7.png
 
 ### Design Review Sections Completed (check all 6)
