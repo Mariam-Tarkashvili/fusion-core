@@ -39,7 +39,10 @@ const ExplanationDisplay = ({
 }) => {
   const [feedback, setFeedback] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
-  const safeScore = readabilityScore && typeof readabilityScore === 'object' ? readabilityScore : { grade: 6, level: 'Elementary School' };
+  const safeScore =
+    readabilityScore && typeof readabilityScore === "object"
+      ? readabilityScore
+      : { grade: 6, level: "Elementary School" };
 
   const handleFeedback = async (type) => {
     setFeedback(type);
