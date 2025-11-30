@@ -24,8 +24,11 @@
 ### Tests & Demo (30 points)
 
 - [x] Test file located at:
-- [x] All tests pass
-- [x] Demo video link:
+      1. https://github.com/Mariam-Tarkashvili/fusion-core/blob/main/src/frontend/src/pages/Index.test.jsx
+      2. https://github.com/Mariam-Tarkashvili/fusion-core/blob/main/src/frontend/src/stores/MedicationStore.test.js
+      3. https://github.com/Mariam-Tarkashvili/fusion-core/blob/main/src/frontend/src/components/ExplanationDisplay.test.jsx
+- [x] All tests pass: https://github.com/Mariam-Tarkashvili/fusion-core/blob/main/docs/evidence/Medsplain%20Demo.mp4
+- [x] Demo video link: https://github.com/Mariam-Tarkashvili/fusion-core/blob/main/docs/evidence/Medsplain%20Demo.mp4
 - [x] Demo video shows: ✅ AI calling functions ✅ Multiple scenarios ✅ Error handling
 
 ### Documentation & Code Quality (20 points)
