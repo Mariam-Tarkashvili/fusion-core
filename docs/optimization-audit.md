@@ -196,14 +196,15 @@ Optimizations were prioritized based on:
 
 ## Cost Calculator
 
-A spreadsheet-based cost calculator was created to compare:
-- Current state vs optimized state
+A tool cost calculator was created to log:
+- Current state 
 - Token usage
 - Model pricing
 - Request volume
 
-**Link:** `docs/cost-calculator.xlsx`  
-*(or screenshot included below)*
+**Link:** `src/backend/app/utils/cost_tracking.py`  
+Outputs jsonl which records endpoint called, model used, input tokens, output tokens,
+cost in USD, latency in miliseconds and cache-hit
 
 ---
 
