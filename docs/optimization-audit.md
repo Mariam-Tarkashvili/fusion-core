@@ -1,17 +1,12 @@
 # Optimization Audit Report
+**Project:** Medication Safety & Explanation API  
+**Lab:** Lab 8 
 
-## Project Overview
+---
 
-This capstone is AI powered medical explanation instrument with a Flask-based backend API that provides:
-- Plain-language medication explanations
-- Medication information retrieval via OpenFDA (RAG)
-- Drug–drug interaction checking
-- LLM-powered chat with function calling
-
-The system integrates:
-- Google Gemini (Flash model) for language generation
-- OpenFDA via a custom RAG service
-- In-memory Python data structures for logging and feedback
+## Part 1: Cost Audit & Baseline  
+### Objective
+Understand the current operational cost, latency, and API usage patterns of the capstone backend before optimization.
 
 ---
 
@@ -19,152 +14,196 @@ The system integrates:
 
 ### 1.1 API Call Inventory
 
-| Endpoint | Purpose | External Dependencies | Notes |
-|--------|--------|----------------------|------|
-| `/api/explain` | Generate plain-language medication explanation | OpenFDA + Gemini | Most expensive endpoint |
-| `/api/medication-info` | Retrieve medication info | OpenFDA | RAG-based |
-| `/api/check-interactions` | Check drug–drug interactions | OpenFDA | Pairwise checks |
-| `/api/chat` | Natural language chat + function calling | Gemini | Can trigger other endpoints |
-| `/api/log-query` | Log interaction query | None | In-memory |
-| `/api/feedback` | Submit user feedback | None | In-memory |
+The backend is implemented using Flask and integrates **Gemini (LLM)** and **OpenFDA** via a RAG-style service.
+
+| Endpoint | LLM Model | External APIs | Description |
+|--------|----------|---------------|-------------|
+| `/api/explain` | `gemini-2.0-flash-exp` | OpenFDA | Generates plain-language medication explanations |
+| `/api/chat` | `gemini-2.0-flash-exp` | OpenFDA (via functions) | Chat endpoint with function calling |
+| `/api/medication-info` | None | OpenFDA | Retrieves medication data via RAG |
+| `/api/check-interactions` | None | OpenFDA | Checks drug–drug interactions |
+| `/api/log-query` | None | None | In-memory logging |
+| `/api/feedback` | None | None | In-memory feedback storage |
+
+**LLM Usage Summary**
+- LLM calls occur in:
+  - `/api/explain`
+  - `/api/chat`
+- No batching
+- No caching
+- Single model used for all LLM tasks
+- No cost or latency instrumentation
 
 ---
 
-### 1.2 LLM Usage
+### 1.2 Baseline Cost Calculation (Monthly Projection)
 
-- **Model used:** `gemini-2.0-flash-exp`
-- **Invocation pattern:**
-  - Direct Gemini calls in `/api/chat`
-  - Indirect Gemini calls via `rag.generate_plain_language_explanation()` in `/api/explain`
-- **No model switching or fallback logic**
-- **No response caching**
+**Assumptions**
+- `/api/explain`: 6,000 requests/month  
+- `/api/chat`: 2,000 requests/month  
+- Avg input tokens per LLM call: 500  
+- Avg output tokens per LLM call: 300  
 
----
+**Gemini 2.0 Flash Estimated Cost**
+- Estimated cost per request: ~$0.0015  
+- Total monthly LLM requests: 8,000  
 
-### 1.3 RAG & External API Usage
+**Estimated Monthly Cost**
+8,000 × $0.0015 ≈ $12.00 / month
 
-- OpenFDA data is retrieved via `RAGService`
-- Used for:
-  - Medication facts
-  - Warnings
-  - Side effects
-  - Drug–drug interactions
-- Repeated OpenFDA calls occur for the same medications
-- No batching across requests
-- No TTL-based invalidation
+
+> This cost is expected to grow rapidly with user adoption and increased explanation requests.
 
 ---
 
-### 1.4 Baseline Cost Estimation (Pre-Optimization)
+### 1.3 Latency Measurements (Estimated)
 
-Assumptions (based on usage patterns):
-- `/api/explain`: ~6,000 requests/month
-- `/api/chat`: ~2,000 requests/month
-- Average Gemini tokens per explanation: ~600 total
-- Gemini Flash pricing (approx.): $0.35 / 1M tokens
+| Endpoint | p50 | p95 | p99 |
+|--------|-----|-----|-----|
+| `/api/explain` | ~1.2s | ~2.5s | ~4.0s |
+| `/api/chat` | ~900ms | ~2.0s | ~3.5s |
+| RAG (OpenFDA only) | ~300ms | ~600ms | ~1.0s |
 
-Estimated Monthly Cost:
-- Explanation generation: ~$12–15
-- Chat usage: ~$4–6
-- **Total estimated LLM cost:** ~$20/month
-
-While current cost is modest, it scales linearly with usage and lacks safeguards.
+*Note: Latency is dominated by LLM generation time.*
 
 ---
 
-### 1.5 Latency Baseline
+### 1.4 Current Cache Status
 
-| Endpoint | Avg Latency | Main Contributors |
-|-------|------------|------------------|
-| `/api/explain` | ~3–4 seconds | OpenFDA + Gemini |
-| `/api/chat` | ~3–6 seconds | Gemini |
-| `/api/check-interactions` | ~1–2 seconds | OpenFDA |
-| `/api/medication-info` | ~1–2 seconds | OpenFDA |
-
----
-
-### 1.6 Current Caching & Instrumentation
-
+- ❌ No prompt caching
 - ❌ No response caching
-- ❌ No LLM prompt caching
-- ❌ No OpenFDA TTL cache
-- ❌ No cost tracking
-- ❌ No latency logging
-- ✔ In-memory logs for interactions & feedback (non-persistent)
+- ❌ No OpenFDA response caching
+- ❌ No TTL or invalidation strategy
 
 ---
 
-## 2. Optimization Opportunities
+## Part 2: Caching Opportunities
 
-| # | Opportunity | Description | Projected Impact | Effort |
-|--|------------|------------|-----------------|--------|
-| 1 | Explanation caching | Cache Gemini explanations per medication | 60–80% LLM reduction | Low |
-| 2 | OpenFDA result caching | Cache medication & interaction lookups | 40–60% fewer API calls | Low |
-| 3 | Function-level caching | Cache interaction results for same med sets | 30–50% | Medium |
-| 4 | Cost instrumentation | Log tokens, latency, cache hits | Observability | Low |
-| 5 | Gemini request deduplication | Prevent repeated explanation generation | 20–30% | Low |
+### Objective
+Reduce repeated LLM and OpenFDA calls through prompt and response caching.
 
 ---
 
-## 3. Selected Top 3 Optimizations
+### Identified Cacheable Patterns
 
-### 1️⃣ Explanation Response Caching
-- Cache output of `generate_explanation(medication_name)`
-- Keyed by normalized medication name
-- TTL-based invalidation (24–48 hours)
-
-### 2️⃣ OpenFDA RAG Caching
-- Cache results of:
-  - `extract_medication_info`
-  - `check_interactions`
-- Prevent repeated external API calls
-
-### 3️⃣ Cost & Latency Instrumentation
-- Log:
-  - Endpoint
-  - Gemini usage
-  - Cache hit/miss
-  - Response latency
+1. Repeated medication explanations (`/api/explain`)
+2. Repeated OpenFDA lookups for common medications
+3. Static system prompts sent to Gemini
+4. Identical chat prompts triggering function calls
 
 ---
 
-## 4. Implementation Plan
+## Part 3: Model Selection Strategy
+
+### Objective
+Reduce cost by matching model complexity to task complexity.
+
+---
+
+### Use Case Categorization
+
+| Task | Complexity | Current Model |
+|----|-----------|---------------|
+| Medication explanation | Medium | Gemini 2.0 Flash |
+| Chat routing / intent | Simple | Gemini 2.0 Flash |
+| FDA data retrieval | Simple | No LLM |
+| Interaction lookup | Simple | No LLM |
+
+---
+
+### Model Optimization Opportunities
+
+- Use cheaper Gemini variants for:
+  - Chat routing
+  - Function selection
+- Reserve higher-quality models only for:
+  - Plain-language explanations
+- Add fallback logic (cheap → expensive model)
+
+---
+
+## Part 4: Optimization Opportunities
+
+### Identified Opportunities
+
+| # | Optimization | Projected Savings | Effort | Notes |
+|--|-------------|------------------|--------|------|
+| 1 | Prompt caching for explanations | 60–80% | Low | High repetition |
+| 2 | OpenFDA response caching | 30–50% | Low | FDA data rarely changes |
+| 3 | Model downgrading for chat | 40–60% | Medium | Needs validation |
+| 4 | Cost tracking instrumentation | Indirect | Low | Required for visibility |
+| 5 | Rate limiting + deduplication | 10–20% | Medium | Prevents abuse |
+
+---
+
+### Prioritization Justification
+
+Optimizations were prioritized based on:
+- Cost impact
+- Ease of implementation
+- Low risk to output quality
+
+---
+
+## Implementation Plan
+
+### Top 3 Selected Optimizations
+
+1. **Prompt & Response Caching**
+2. **Model Selection & Downgrading**
+3. **Cost Tracking Instrumentation**
+
+---
+
+### Team Assignments
+
+| Task | Owner |
+|----|------|
+| Caching implementation | Mariam Tarkashvili |
+| Model selection & testing | Tekla Chapidze |
+| Cost tracking & logging | Saba Samkharadze |
+
+---
 
 ### Timeline
 
-| Task | Target |
-|----|-------|
-| Implement caching | Week 10 |
-| Add cost tracking | Week 10 |
-| Measure impact | Week 10 |
+| Date | Task |
+|----|-----|
+| Week 10 Lab | Audit + planning |
+| Week 10 HW | Implement caching |
+| Week 10 HW | Add cost tracking |
+| Week 10 HW | Model optimization |
 
 ---
 
 ### Success Metrics
 
-- ≥70% reduction in Gemini calls for `/api/explain`
-- `/api/explain` cache-hit latency < 300ms
-- No degradation in explanation clarity or accuracy
+| Metric | Baseline | Target |
+|-----|---------|--------|
+| Monthly LLM cost | ~$12 | <$5 |
+| Avg `/api/explain` latency | ~1.2s | <900ms |
+| Cache hit rate | 0% | >60% |
 
 ---
 
 ### Risk Mitigation
 
-- TTL-based cache expiration
-- Conservative cache scope (read-only data)
-- Manual validation of cached explanations
+- TTL-based cache invalidation
+- Model fallback for degraded quality
+- Manual QA on explanation outputs
 
 ---
 
-## 5. Cost Calculator
+## Cost Calculator
 
-A spreadsheet-based calculator estimates:
+A spreadsheet-based cost calculator was created to compare:
+- Current state vs optimized state
+- Token usage
+- Model pricing
 - Request volume
-- Average token usage
-- Gemini pricing
-- Projected savings after caching
 
-**Projected optimized cost:** ~$5–7/month  
-**Estimated reduction:** ~65–75%
+**Link:** `docs/cost-calculator.xlsx`  
+*(or screenshot included below)*
 
-(Calculator screenshot or link included)
+---
+
