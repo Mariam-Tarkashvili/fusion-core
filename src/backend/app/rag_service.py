@@ -4,6 +4,10 @@ from typing import List, Dict, Optional
 import time
 from functools import lru_cache
 import textstat
+from .utils.cost_tracking import log_llm_usage, Timer
+
+# In-memory cache for prompt/response caching
+_PROMPT_CACHE = {}
 
 class RAGService:
     def __init__(self):
@@ -33,7 +37,6 @@ class RAGService:
         Extract comprehensive medication information from OpenFDA.
         """
         fda_data = self._search_openfda_drug_label(medication_name)
-
         if not fda_data:
             return {"found": False, "message": f"No information found for '{medication_name}'"}
 
@@ -51,34 +54,20 @@ class RAGService:
         }
 
         openfda = fda_data.get("openfda", {})
-
-        # Generic and brand names
         info["generic_name"] = openfda.get("generic_name", [None])[0]
         info["brand_names"] = openfda.get("brand_name", [])
-
-        # Drug class
         info["drug_class"] = openfda.get("pharm_class_epc", [None])[0]
 
-        # Uses
         if fda_data.get("indications_and_usage"):
-            uses_text = fda_data["indications_and_usage"][0]
-            info["uses"] = [uses_text[:500]]
-
-        # Dosage
+            info["uses"] = [fda_data["indications_and_usage"][0][:500]]
         if fda_data.get("dosage_and_administration"):
             info["dosage"] = fda_data["dosage_and_administration"][0][:500]
-
-        # Side effects
         if fda_data.get("adverse_reactions"):
             info["side_effects"] = [fda_data["adverse_reactions"][0][:500]]
-
-        # Warnings
         if fda_data.get("warnings"):
             info["warnings"] = [fda_data["warnings"][0][:500]]
         elif fda_data.get("boxed_warning"):
             info["warnings"] = [fda_data["boxed_warning"][0][:500]]
-
-        # Drug interactions
         if fda_data.get("drug_interactions"):
             info["interactions"] = [{"description": fda_data["drug_interactions"][0][:500], "source": "FDA"}]
 
@@ -95,8 +84,6 @@ class RAGService:
         Check drug interactions using OpenFDA labels.
         """
         interactions = []
-
-        # Get FDA info for all drugs
         med_info_map = {med: self._search_openfda_drug_label(med) for med in medications}
 
         for i in range(len(medications)):
@@ -133,33 +120,39 @@ class RAGService:
         return interactions
 
     def check_interactions(self, medications: List[str]) -> Dict:
-        """
-        Check drug-drug interactions using OpenFDA labels (non-deprecated).
-        """
         if len(medications) < 2:
             return {"found": False, "message": "At least 2 medications are required."}
-
         interactions = self._check_fda_interactions(medications)
-
         return {
             "found": True,
             "medications": medications,
             "pairs_evaluated": len(medications) * (len(medications) - 1) // 2,
             "total_interactions": len([i for i in interactions if i["severity"] != "unknown"]),
             "interactions": interactions,
-            "sources": [{
-                "name": "OpenFDA Drug Labels",
-                "url": "https://open.fda.gov/apis/drug/label/",
-                "type": "FDA"
-            }]
+            "sources": [{"name": "OpenFDA Drug Labels", "url": "https://open.fda.gov/apis/drug/label/", "type": "FDA"}]
         }
 
     def generate_plain_language_explanation(self, medication_name: str, gemini_api_key: str) -> Dict:
         """
         Generate plain-language explanation using FDA data + LLM.
+        Implements prompt caching, model selection/downgrade, and cost tracking.
         """
-        med_info = self.extract_medication_info(medication_name)
+        # Check cache first
+        cache_key = f"explain:{medication_name}"
+        cached = _PROMPT_CACHE.get(cache_key)
+        if cached:
+            # Cost tracking for cache hit
+            log_llm_usage(
+                endpoint="/api/explain",
+                model=cached["model"],
+                tokens_input=cached["tokens_input"],
+                tokens_output=cached["tokens_output"],
+                latency_ms=0,
+                cache_hit=True
+            )
+            return cached["result"]
 
+        med_info = self.extract_medication_info(medication_name)
         if not med_info.get("found"):
             return {"success": False, "message": med_info.get("message")}
 
@@ -188,22 +181,38 @@ Write a concise 3-4 paragraph explanation that covers:
 
 Use simple language, short sentences, and avoid medical jargon where possible."""
 
-        try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent"
-            headers = {"Content-Type": "application/json", "x-goog-api-key": gemini_api_key}
-            payload = {
-                "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                "generation_config": {"temperature": 0.3}
-            }
+        # Model selection / downgrade
+        # Use cheaper model for short/simple explanations
+        selected_model = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp")
+        if len(prompt) < 500:  # simple prompt
+            selected_model = "gemini-1.0-basic"  # free or lower-cost
 
-            response = requests.post(url, headers=headers, json=payload, timeout=30)
-            response.raise_for_status()
-            result = response.json()
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{selected_model}:generateContent"
+        headers = {"Content-Type": "application/json", "x-goog-api-key": gemini_api_key}
+        payload = {"contents": [{"role": "user", "parts": [{"text": prompt}]}], "generation_config": {"temperature": 0.3}}
+
+        try:
+            with Timer() as t:
+                response = requests.post(url, headers=headers, json=payload, timeout=30)
+                response.raise_for_status()
+                result = response.json()
 
             explanation = result["candidates"][0]["content"]["parts"][0]["text"]
-            reading_level = textstat.flesch_kincaid_grade(explanation)
+            usage = result.get("usageMetadata", {})
+            tokens_input = usage.get("promptTokenCount", 0)
+            tokens_output = usage.get("candidatesTokenCount", 0)
 
-            return {
+            log_llm_usage(
+                endpoint="/api/explain",
+                model=selected_model,
+                tokens_input=tokens_input,
+                tokens_output=tokens_output,
+                latency_ms=t.elapsed_ms,
+                cache_hit=False
+            )
+
+            reading_level = textstat.flesch_kincaid_grade(explanation)
+            final_result = {
                 "success": True,
                 "explanation": explanation,
                 "reading_level": round(reading_level, 1),
@@ -211,6 +220,17 @@ Use simple language, short sentences, and avoid medical jargon where possible.""
                 "sources": med_info.get("sources", []),
                 "medication_info": med_info
             }
+
+            # Save to cache
+            _PROMPT_CACHE[cache_key] = {
+                "result": final_result,
+                "model": selected_model,
+                "tokens_input": tokens_input,
+                "tokens_output": tokens_output,
+                "timestamp": time.time()
+            }
+
+            return final_result
 
         except Exception as e:
             return {"success": False, "message": f"Failed to generate explanation: {str(e)}"}
