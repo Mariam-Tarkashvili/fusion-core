@@ -7,6 +7,13 @@ from .rag_service import RAGService
 # Initialize RAG service
 rag = RAGService()
 
+# In-memory caches for prompt/function results
+_MED_INFO_CACHE = {}
+_INTERACTION_CACHE = {}
+
+# Track cache entry timestamps for TTL
+_MED_INFO_CACHE_TIMES = {}
+_INTERACTION_CACHE_TIMES = {}
 
 def _normalize_name(name: str) -> str:
     return name.strip().lower()
@@ -14,9 +21,10 @@ def _normalize_name(name: str) -> str:
 
 def get_medication_info(medication_name: str, include_interactions: bool = False,
                         include_side_effects: bool = True) -> Dict:
-    """
-    Retrieve medication information using RAG from OpenFDA.
-    """
+    cache_key = f"med_info:{medication_name}:{include_interactions}:{include_side_effects}"
+    if cache_key in _MED_INFO_CACHE:
+        return _MED_INFO_CACHE[cache_key]
+
     med_info = rag.extract_medication_info(medication_name)
 
     if not med_info.get("found"):
@@ -25,7 +33,6 @@ def get_medication_info(medication_name: str, include_interactions: bool = False
             "message": med_info.get("message", f"Medication '{medication_name}' not found.")
         }
 
-    # Format interactions if requested
     interactions = None
     if include_interactions and med_info.get("interactions"):
         interactions = []
@@ -49,27 +56,26 @@ def get_medication_info(medication_name: str, include_interactions: bool = False
     if interactions is not None:
         data["interactions"] = interactions
 
-    return {"status": "success", "data": data}
+    result = {"status": "success", "data": data}
+    _MED_INFO_CACHE[cache_key] = result
+    _MED_INFO_CACHE_TIMES[cache_key] = datetime.utcnow()
+    return result
 
 
 def check_multiple_interactions(medications: List[str]) -> Dict:
-    """
-    Check drug-drug interactions using OpenFDA labels (non-deprecated).
-    Returns clear messages if no info is found.
-    """
-    # Normalize & remove duplicates
     meds = list(dict.fromkeys([m.strip() for m in medications if m.strip()]))
+    cache_key = f"interactions:{','.join(sorted(meds))}"
+    if cache_key in _INTERACTION_CACHE:
+        return _INTERACTION_CACHE[cache_key]
 
     if len(meds) < 2:
         return {"status": "error", "message": "At least 2 medications are required."}
-
     if len(meds) > 5:
         meds = meds[:5]
 
-    # Call RAG service (OpenFDA)
     result = rag.check_interactions(meds)
 
-    return {
+    final_result = {
         "status": "success",
         "data": {
             "medications": meds,
@@ -85,26 +91,20 @@ def check_multiple_interactions(medications: List[str]) -> Dict:
         }
     }
 
+    _INTERACTION_CACHE[cache_key] = final_result
+    _INTERACTION_CACHE_TIMES[cache_key] = datetime.utcnow()
+    return final_result
+
 
 def generate_explanation(medication_name: str) -> Dict:
-    """
-    Generate a plain-language explanation using OpenFDA + Gemini.
-    Includes readability score and source citations.
-    """
     gemini_api_key = os.getenv("GEMINI_API_KEY")
     if not gemini_api_key:
-        return {
-            "status": "error",
-            "message": "GEMINI_API_KEY not configured"
-        }
+        return {"status": "error", "message": "GEMINI_API_KEY not configured"}
 
     result = rag.generate_plain_language_explanation(medication_name, gemini_api_key)
 
     if not result.get("success"):
-        return {
-            "status": "error",
-            "message": result.get("message", "Failed to generate explanation")
-        }
+        return {"status": "error", "message": result.get("message", "Failed to generate explanation")}
 
     return {
         "status": "success",
@@ -119,14 +119,12 @@ def generate_explanation(medication_name: str) -> Dict:
     }
 
 
-# In-memory "log store" for minimal implementation
+# In-memory "log store"
 _LOG_STORE = {}
 _FEEDBACK_STORE = {}
 
-
 def log_interaction_query(medications: List[str], interactions_found: int,
                           severity_level: str = "none", timestamp=None) -> dict:
-    """Log an interaction query for the current session (in-memory)."""
     log_id = f"log_{uuid.uuid4().hex[:12]}"
     entry = {
         "log_id": log_id,
@@ -140,10 +138,6 @@ def log_interaction_query(medications: List[str], interactions_found: int,
 
 
 def submit_feedback(explanation_id: str, user_id: str, feedback_type: str, comment: str = None) -> Dict:
-    """
-    Submit user feedback on an explanation.
-    feedback_type: "helpful" or "unclear"
-    """
     feedback_id = f"fb_{uuid.uuid4().hex[:12]}"
     entry = {
         "feedback_id": feedback_id,
@@ -154,8 +148,4 @@ def submit_feedback(explanation_id: str, user_id: str, feedback_type: str, comme
         "timestamp": datetime.utcnow().isoformat() + "Z"
     }
     _FEEDBACK_STORE[feedback_id] = entry
-    return {
-        "status": "success",
-        "feedback_id": feedback_id,
-        "message": "Feedback submitted successfully."
-    }
+    return {"status": "success", "feedback_id": feedback_id, "message": "Feedback submitted successfully."}
