@@ -5,7 +5,17 @@ import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
-from flask_cors import CORS
+from .utils.cost_tracking import log_llm_usage, Timer
+from datetime import datetime, timedelta
+from . import functions as funcs
+_MED_INFO_CACHE = funcs._MED_INFO_CACHE
+_INTERACTION_CACHE = funcs._INTERACTION_CACHE
+_MED_INFO_CACHE_TIMES = funcs._MED_INFO_CACHE_TIMES
+_INTERACTION_CACHE_TIMES = funcs._INTERACTION_CACHE_TIMES
+
+
+# TTL for in-memory caches (seconds)
+CACHE_TTL_SECONDS = 3600  # 1 hour
 
 load_dotenv()
 
@@ -18,7 +28,7 @@ from .models import (
 from . import functions as funcs
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173", "http://localhost:8080"], supports_credentials=True)
+CORS(app)  # Enable CORS for frontend
 
 # Config from env
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -34,6 +44,18 @@ def ok_json(obj):
     if hasattr(obj, "model_dump"):
         return jsonify(obj.model_dump(by_alias=True))
     return jsonify(obj)
+
+
+def _expire_cache(cache: dict, times: dict):
+    now = datetime.utcnow()
+    keys_to_delete = []
+    for key, ts in times.items():
+        if now - ts > timedelta(seconds=CACHE_TTL_SECONDS):
+            keys_to_delete.append(key)
+    for key in keys_to_delete:
+        cache.pop(key, None)
+        times.pop(key, None)
+
 
 
 # -----------------------
@@ -254,9 +276,23 @@ def route_chat():
 
     # Call Gemini
     try:
-        resp = requests.post(GEMINI_API_URL, headers=headers, json=request_payload, timeout=30)
+        with Timer() as t:
+            resp = requests.post(GEMINI_API_URL, headers=headers, json=request_payload, timeout=30)
         resp.raise_for_status()
         model_response = resp.json()
+        usage = model_response.get("usageMetadata", {})
+        tokens_input = usage.get("promptTokenCount", 0)
+        tokens_output = usage.get("candidatesTokenCount", 0)
+
+        log_llm_usage(
+            endpoint="/api/chat",
+            model=GEMINI_MODEL,
+            tokens_input=tokens_input,
+            tokens_output=tokens_output,
+            latency_ms=t.elapsed_ms,
+            cache_hit=False
+        )
+
     except Exception as e:
         return jsonify({
             "status": "error",
@@ -362,6 +398,23 @@ def route_chat():
         "via": "gemini:text",
         "text": text
     })
+
+@app.route("/api/cache/flush", methods=["POST"])
+def route_flush_cache():
+    """Flush all in-memory caches."""
+    _MED_INFO_CACHE.clear()
+    _INTERACTION_CACHE.clear()
+    _MED_INFO_CACHE_TIMES.clear()
+    _INTERACTION_CACHE_TIMES.clear()
+    return jsonify({"status": "success", "message": "All caches cleared."})
+
+
+@app.route("/api/cache/expire", methods=["POST"])
+def route_expire_cache():
+    """Expire old cache entries based on TTL."""
+    _expire_cache(_MED_INFO_CACHE, _MED_INFO_CACHE_TIMES)
+    _expire_cache(_INTERACTION_CACHE, _INTERACTION_CACHE_TIMES)
+    return jsonify({"status": "success", "message": "Expired old cache entries."})
 
 
 if __name__ == "__main__":
