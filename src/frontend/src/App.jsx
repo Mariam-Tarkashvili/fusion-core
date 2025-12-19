@@ -11,31 +11,27 @@ const theme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#14b8a6",
-      light: "#5eead4",
-      dark: "#0f766e",
-    },
-    secondary: {
-      main: "#06b6d4",
-      light: "#67e8f9",
-      dark: "#0891b2",
+      main: "#6366F1",
+      light: "#8B8CFF",
+      dark: "#4F46E5",
     },
     success: {
-      main: "#10b981",
-      light: "#34d399",
-      dark: "#059669",
+      main: "#10B981",
+    },
+    error: {
+      main: "#EF4444",
     },
     background: {
-      default: "#f8fafc",
+      default: "#F9FAFB",
       paper: "#ffffff",
     },
     text: {
-      primary: "#0f172a",
+      primary: "#1F2937",
       secondary: "#64748b",
     },
   },
   typography: {
-    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     h2: {
       fontWeight: 800,
     },
@@ -49,6 +45,7 @@ const theme = createTheme({
   shape: {
     borderRadius: 12,
   },
+  spacing: 8,
 });
 
 const App = () => (

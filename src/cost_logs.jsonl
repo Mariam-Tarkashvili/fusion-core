@@ -1,0 +1,4 @@
+{"timestamp": "2025-12-19T11:16:09.507184Z", "endpoint": "/api/chat", "model": "gemini-2.5-flash", "tokens_input": 218, "tokens_output": 20, "cost_usd": 9e-05, "latency_ms": 1519, "cache_hit": false}
+{"timestamp": "2025-12-19T11:16:32.394928Z", "endpoint": "/api/chat", "model": "gemini-2.5-flash", "tokens_input": 214, "tokens_output": 23, "cost_usd": 9.1e-05, "latency_ms": 1434, "cache_hit": false}
+{"timestamp": "2025-12-19T11:17:11.631870Z", "endpoint": "/api/chat", "model": "gemini-2.5-flash", "tokens_input": 210, "tokens_output": 23, "cost_usd": 9e-05, "latency_ms": 1206, "cache_hit": false}
+{"timestamp": "2025-12-19T11:34:40.706033Z", "endpoint": "/api/chat", "model": "gemini-2.5-flash", "tokens_input": 212, "tokens_output": 24, "cost_usd": 9.1e-05, "latency_ms": 1325, "cache_hit": false}
