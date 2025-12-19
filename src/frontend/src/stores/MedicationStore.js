@@ -71,7 +71,51 @@ class MedicationStore {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to fetch medication information");
+        const status = response.status;
+        const err = new Error(errorData.message || "Failed to fetch medication information");
+        // prefer explicit code from API, otherwise fallback to HTTP status
+        err.code = errorData.code || status;
+        // mark as already handled so catch block doesn't duplicate handling
+        err.handled = true;
+
+        runInAction(() => {
+          // Map 404 to a clear 'not found' message
+          if (status === 404 || err.code === 404) {
+            this.error = {
+              title: errorData.title || "Medication not found",
+              message:
+                errorData.message ||
+                `We couldn't find information for \"${medicationName}\". Please check the spelling or try a different medication name.`,
+              action: errorData.action || "Try a different medication name or check spelling.",
+            };
+
+            this.chatHistory.push({
+              role: "assistant",
+              content: `I couldn't find information for \"${medicationName}\". Try checking the spelling or use a generic/common name.`,
+              timestamp: new Date(),
+              isError: true,
+            });
+          } else {
+            // structured error for UI (generic)
+            this.error = {
+              title: errorData.title || "Medication lookup failed",
+              message: errorData.message || "The medication could not be retrieved.",
+              action: errorData.action || "Please check the name or try again later.",
+            };
+
+            // Notify user via assistant chat (keeps the assistant in the loop)
+            this.chatHistory.push({
+              role: "assistant",
+              content: `Unable to retrieve medication information: ${this.error.message}`,
+              timestamp: new Date(),
+              isError: true,
+            });
+          }
+
+          this.isLoading = false;
+        });
+
+        throw err;
       }
 
       const data = await response.json();
@@ -119,7 +163,22 @@ class MedicationStore {
       return data;
     } catch (error) {
       runInAction(() => {
-        this.error = error.message || "Failed to fetch medication information";
+        // If this error was already handled above (err.handled), don't duplicate messages
+        if (!error.handled) {
+          this.error = {
+            title: "Request failed",
+            message: error.message || "Failed to fetch medication information",
+            action: "Please try again or check your network connection.",
+          };
+
+          // push assistant-visible message
+          this.chatHistory.push({
+            role: "assistant",
+            content: `Unable to retrieve medication information: ${this.error.message}`,
+            timestamp: new Date(),
+            isError: true,
+          });
+        }
         this.isLoading = false;
       });
       throw error;
@@ -203,16 +262,8 @@ class MedicationStore {
       runInAction(() => {
         // Handle different response types from Gemini
         if (data.via === "gemini:function_call") {
-          // Function call response - show the function result
-          this.chatHistory.push({
-            role: "assistant",
-            content: `I checked that for you using ${data.function}:`,
-            via: data.via,
-            function: data.function,
-            timestamp: new Date(),
-          });
-
-          // Add the function result as a separate message
+          // Function call response - add the function result as an assistant message
+          // Handle function call results without exposing internal function names
           if (data.result && data.result.data) {
             const resultData = data.result.data;
             let resultText = "";
@@ -221,31 +272,39 @@ class MedicationStore {
               // Interaction check result
               resultText = `Found ${resultData.total_interactions || 0} interaction(s) among ${
                 Array.isArray(resultData.medications) ? resultData.medications.join(", ") : "medications"
-              }.\n\n`;
+              }.`;
               resultData.interactions.forEach((int) => {
-                resultText += `⚠️ ${int.drug1 || "Drug 1"} + ${int.drug2 || "Drug 2"} (${
+                resultText += `\n\n⚠️ ${int.drug1 || "Drug 1"} + ${int.drug2 || "Drug 2"} (${
                   int.severity || "unknown"
                 }):\n${int.description || "No description"}\nRecommendation: ${
                   int.recommendation || "Consult healthcare provider"
-                }\n\n`;
+                }`;
+              });
+
+              // Push structured interaction result for richer UI rendering
+              this.chatHistory.push({
+                role: "assistant",
+                content: resultText,
+                timestamp: new Date(),
+                meta: { type: "interaction_result", data: resultData },
               });
             } else if (resultData.generic_name) {
-              // Medication info result
+              // Medication info result - attach structured data so UI can render hierarchy
               resultText = `**${resultData.generic_name}** (${resultData.drug_class || "Unknown class"})\n\n`;
               resultText += `Uses: ${Array.isArray(resultData.uses) ? resultData.uses.join(", ") : "Not specified"}\n`;
               resultText += `Dosage: ${resultData.common_dosage || "Consult healthcare provider"}\n\n`;
               resultText += `Side Effects: ${
                 Array.isArray(resultData.side_effects) ? resultData.side_effects.join(", ") : "Not specified"
               }`;
-            }
 
-            this.chatHistory.push({
-              role: "assistant",
-              content: resultText,
-              timestamp: new Date(),
-            });
+              this.chatHistory.push({
+                role: "assistant",
+                content: resultText,
+                timestamp: new Date(),
+                meta: { type: "medication_info", data: resultData },
+              });
+            }
           }
-        } else {
           // Text-only response
           this.chatHistory.push({
             role: "assistant",
@@ -260,16 +319,29 @@ class MedicationStore {
 
       return data;
     } catch (error) {
+      // Log the raw error for debugging but show a generic message to users
+      // to avoid leaking internal service/provider errors.
+      // eslint-disable-next-line no-console
+      console.error("sendChatMessage error:", error);
+
       runInAction(() => {
-        this.error = error.message || "Failed to send chat message";
+        const generic = "There was an unexpected error. Please try again later.";
+        this.error = {
+          title: "Unexpected error",
+          message: generic,
+          action: "Please try again later.",
+        };
+
         this.chatHistory.push({
           role: "assistant",
-          content: `Error: ${this.error}`,
+          content: generic,
           timestamp: new Date(),
           isError: true,
         });
+
         this.isLoading = false;
       });
+
       throw error;
     }
   }

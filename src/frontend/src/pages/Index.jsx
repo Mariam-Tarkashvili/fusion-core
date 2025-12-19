@@ -1,4 +1,3 @@
-import React from "react";
 import { observer } from "mobx-react";
 import { useState } from "react";
 import { Container, Box, Typography, Divider } from "@mui/material";
@@ -10,6 +9,8 @@ import QueryInterface from "./components/QueryInterface";
 import ExplanationDisplay from "./components/ExplanationDisplay";
 import InteractionChecker from "./components/InteractionChecker";
 import ChatAssistant from "./components/ChatAssistant";
+import LoadingSpinner from "./components/LoadingSpinner";
+import ErrorBanner from "./components/ErrorBanner";
 
 const Index = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -105,7 +106,13 @@ const Index = () => {
               </Typography>
             </Box>
 
+            <ErrorBanner error={medicationStore.error} onAction={() => medicationStore.clearError()} />
+
             <QueryInterface onSearch={handleSearch} isLoading={medicationStore.isLoading} />
+
+            {medicationStore.isLoading && !medicationStore.explanation && (
+              <LoadingSpinner message="Fetching medication details..." estimate="2-5 seconds" />
+            )}
 
             {medicationStore.explanation && !medicationStore.isLoading && (
               <ExplanationDisplay {...medicationStore.explanation} />
@@ -123,6 +130,7 @@ const Index = () => {
               onCheckInteractions={handleCheckInteractions}
               interactions={medicationStore.interactions}
               isLoading={medicationStore.isLoading}
+              error={medicationStore.error}
             />
 
             <Divider sx={{ my: 6 }} />

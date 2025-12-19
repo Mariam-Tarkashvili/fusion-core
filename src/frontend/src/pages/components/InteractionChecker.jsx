@@ -15,6 +15,8 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Add, Clear, Science, WarningAmber } from "@mui/icons-material";
+import LoadingSpinner from "./LoadingSpinner";
+import ErrorBanner from "./ErrorBanner";
 
 const InteractionChecker = ({
   interactionInput,
@@ -26,6 +28,7 @@ const InteractionChecker = ({
   onCheckInteractions,
   interactions,
   isLoading,
+  error,
 }) => {
   return (
     <Card elevation={2} sx={{ mb: 4, borderRadius: 3 }}>
@@ -48,6 +51,8 @@ const InteractionChecker = ({
       </Box>
 
       <CardContent sx={{ p: 3 }}>
+        {error && <ErrorBanner error={error} onAction={onCheckInteractions} />}
+        {isLoading && !interactions && <LoadingSpinner message="Checking interactions..." estimate="2-5 seconds" />}
         <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
           <TextField
             label="Medication name"
