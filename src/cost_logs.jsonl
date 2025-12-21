@@ -19,3 +19,6 @@
 {"timestamp": "2025-12-19T14:19:53.041315Z", "endpoint": "/api/chat", "model": "gemini-2.5-flash", "tokens_input": 209, "tokens_output": 21, "cost_usd": 8.8e-05, "latency_ms": 1883, "cache_hit": false}
 {"timestamp": "2025-12-19T14:24:43.966495Z", "endpoint": "/api/chat", "model": "gemini-2.5-flash", "tokens_input": 209, "tokens_output": 21, "cost_usd": 8.8e-05, "latency_ms": 1837, "cache_hit": false}
 {"timestamp": "2025-12-19T14:25:05.929209Z", "endpoint": "/api/chat", "model": "gemini-2.5-flash", "tokens_input": 209, "tokens_output": 19, "cost_usd": 8.6e-05, "latency_ms": 1503, "cache_hit": false}
+{"timestamp": "2025-12-19T16:23:21.457257Z", "endpoint": "/api/chat", "model": "gemini-2.5-flash", "tokens_input": 212, "tokens_output": 54, "cost_usd": 0.000112, "latency_ms": 2044, "cache_hit": false}
+{"timestamp": "2025-12-21T22:28:22.750831Z", "endpoint": "/api/chat", "model": "gemini-2.5-flash", "tokens_input": 215, "tokens_output": 22, "cost_usd": 9.1e-05, "latency_ms": 9063, "cache_hit": false}
+{"timestamp": "2025-12-21T22:32:07.953521Z", "endpoint": "/api/chat", "model": "gemini-2.5-flash", "tokens_input": 218, "tokens_output": 22, "cost_usd": 9.2e-05, "latency_ms": 1646, "cache_hit": false}
