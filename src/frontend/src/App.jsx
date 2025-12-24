@@ -15,11 +15,6 @@ import {
   Chip,
   Link,
   Divider,
-  ToggleButton,
-  ToggleButtonGroup,
-  FormControl,
-  Select,
-  MenuItem,
   Container,
   Alert,
   AlertTitle,
@@ -72,10 +67,6 @@ const theme = createTheme({
 
 const ChatAssistant = observer(() => {
   const [chatPrompt, setChatPrompt] = React.useState("");
-  const [mode, setMode] = React.useState("assistant");
-  const [level, setLevel] = React.useState("Intermediate");
-  const [medsList, setMedsList] = React.useState([]);
-  const [medInput, setMedInput] = React.useState("");
   const chatHistory = medicationStore.chatHistory;
   const isLoading = medicationStore.isLoading;
   const endRef = React.useRef(null);
@@ -86,19 +77,12 @@ const ChatAssistant = observer(() => {
     }
   }, [chatHistory.length]);
 
-  const handleModeChange = (event, value) => {
-    if (value) setMode(value);
-  };
-
-  const handleLevelChange = (e) => setLevel(e.target.value);
-
   const handleSend = async () => {
     const prompt = chatPrompt.trim();
-    if (mode !== "interactions" && !prompt) return;
-    if (mode !== "interactions") setChatPrompt("");
+    if (!prompt) return;
+    setChatPrompt("");
 
-    const userContent = mode === "interactions" && medsList.length > 0 ? medsList.join(", ") : prompt;
-    medicationStore.addChatMessage({ role: "user", content: userContent, timestamp: new Date(), mode });
+    medicationStore.addChatMessage({ role: "user", content: prompt, timestamp: new Date() });
 
     medicationStore.addChatMessage({
       role: "assistant",
@@ -114,84 +98,8 @@ const ChatAssistant = observer(() => {
     };
 
     try {
-      if (mode === "assistant") {
-        await medicationStore.sendChatMessage(`[level:${level}] ${prompt}`);
-        clearPending();
-      } else if (mode === "search") {
-        try {
-          const data = await medicationStore.getMedicationInfo(prompt, true, true);
-          clearPending();
-
-          if (data && data.data) {
-            medicationStore.addChatMessage({
-              role: "assistant",
-              content: `Medication information for ${data.data.generic_name || prompt}`,
-              timestamp: new Date(),
-              meta: { type: "medication_info", data: data.data },
-            });
-          }
-        } catch (err) {
-          clearPending();
-
-          // Error is already added to chatHistory by the store, so we don't need to add it again
-          // But we need to ensure it's visible
-          if (!medicationStore.chatHistory.some((m) => m.isError && m.timestamp > new Date(Date.now() - 1000))) {
-            medicationStore.addChatMessage({
-              role: "assistant",
-              content:
-                err.message ||
-                "Failed to retrieve medication information. Please check the medication name and try again.",
-              timestamp: new Date(),
-              isError: true,
-            });
-          }
-        }
-      } else if (mode === "interactions") {
-        let meds = Array.isArray(medsList) && medsList.length > 0 ? medsList.slice() : [];
-        if (meds.length === 0 && prompt) {
-          meds = prompt
-            .split(/[;,\n]/)
-            .map((m) => m.trim())
-            .filter(Boolean);
-        }
-
-        if (meds.length === 0) {
-          clearPending();
-          medicationStore.addChatMessage({
-            role: "assistant",
-            content: "Please provide one or more medication names to check for interactions.",
-            timestamp: new Date(),
-            isError: true,
-          });
-          medicationStore.setIsLoading(false);
-          return;
-        }
-
-        setMedsList([]);
-        setMedInput("");
-
-        try {
-          const result = await medicationStore.checkInteractions(meds);
-          clearPending();
-
-          if (result && result.data) {
-            medicationStore.addChatMessage({
-              role: "assistant",
-              content: `Interaction check results for: ${meds.join(", ")}`,
-              timestamp: new Date(),
-              meta: { type: "interaction_result", data: result.data },
-            });
-          }
-        } catch (err) {
-          clearPending();
-          medicationStore.addChatMessage({
-            role: "assistant",
-            content: err.message || "Failed to check interactions. Please try again.",
-            timestamp: new Date(),
-            isError: true,
-          });
-        }
-      }
+      await medicationStore.sendChatMessage(prompt);
+      clearPending();
     } catch (err) {
       clearPending();
 
@@ -212,27 +120,9 @@ const ChatAssistant = observer(() => {
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (mode === "interactions") {
-        if (medInput.trim()) {
-          const m = medInput.trim();
-          if (!medsList.includes(m)) setMedsList((s) => [...s, m]);
-          setMedInput("");
-        }
-        return;
-      }
-
       handleSend();
     }
   };
-
-  const addMed = () => {
-    const m = medInput.trim();
-    if (!m) return;
-    if (!medsList.includes(m)) setMedsList((s) => [...s, m]);
-    setMedInput("");
-  };
-
-  const removeMed = (m) => setMedsList((s) => s.filter((x) => x !== m));
 
   const renderMessage = (msg, idx) => {
     const isUser = msg.role === "user";
@@ -574,7 +464,6 @@ const ChatAssistant = observer(() => {
         >
           <Typography variant="caption" display="block" fontWeight="bold" sx={{ mb: 0.5, opacity: 0.8 }}>
             {isUser ? "You" : "🤖 AI Assistant"}
-            {isUser && msg.mode && <Chip label={msg.mode} size="small" sx={{ ml: 1 }} variant="outlined" />}
           </Typography>
           <Typography variant="body2" sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word", lineHeight: 1.6 }}>
             {msg.content}
@@ -653,72 +542,24 @@ const ChatAssistant = observer(() => {
         </Paper>
 
         <Box sx={{ px: "15%", p: 3, display: "flex", flexDirection: "column", gap: 2 }}>
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-            <ToggleButtonGroup value={mode} exclusive onChange={handleModeChange} size="small" color="primary">
-              <ToggleButton value="assistant">Assistant</ToggleButton>
-              <ToggleButton value="search">Search</ToggleButton>
-              <ToggleButton value="interactions">Interactions</ToggleButton>
-            </ToggleButtonGroup>
-
-            <FormControl size="small">
-              <Select value={level} onChange={handleLevelChange} sx={{ minWidth: 140 }}>
-                <MenuItem value="Basic">Basic</MenuItem>
-                <MenuItem value="Intermediate">Intermediate</MenuItem>
-                <MenuItem value="Expert">Expert</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-
           <Stack direction="row" spacing={2} alignItems="flex-end">
-            {mode === "interactions" ? (
-              <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1 }}>
-                {medsList.length > 0 && (
-                  <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1 }}>
-                    {medsList.map((m) => (
-                      <Chip key={m} label={m} onDelete={() => removeMed(m)} />
-                    ))}
-                  </Box>
-                )}
-
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <TextField
-                    label="Add medication"
-                    placeholder="Type a medication and press Enter or Add"
-                    value={medInput}
-                    onChange={(e) => setMedInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    fullWidth
-                    disabled={isLoading}
-                    sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-                    size="small"
-                  />
-                  <Button variant="outlined" onClick={addMed} disabled={!medInput.trim() || isLoading}>
-                    Add
-                  </Button>
-                </Box>
-              </Box>
-            ) : (
-              <TextField
-                label="Ask a question..."
-                placeholder="e.g., Can I take aspirin with warfarin?"
-                value={chatPrompt}
-                onChange={(e) => setChatPrompt(e.target.value)}
-                onKeyPress={handleKeyPress}
-                multiline
-                maxRows={4}
-                fullWidth
-                disabled={isLoading}
-                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-              />
-            )}
+            <TextField
+              label="Ask a question..."
+              placeholder="e.g., Can I take aspirin with warfarin?"
+              value={chatPrompt}
+              onChange={(e) => setChatPrompt(e.target.value)}
+              onKeyPress={handleKeyPress}
+              multiline
+              maxRows={4}
+              fullWidth
+              disabled={isLoading}
+              sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+            />
 
             <Button
               variant="contained"
               onClick={handleSend}
-              disabled={
-                isLoading ||
-                (mode === "interactions" ? medsList.length === 0 && !chatPrompt.trim() : !chatPrompt.trim())
-              }
+              disabled={isLoading || !chatPrompt.trim()}
               startIcon={isLoading ? <CircularProgress size={20} /> : <Send />}
               sx={{
                 minWidth: 140,
@@ -729,7 +570,7 @@ const ChatAssistant = observer(() => {
                 "&:hover": { background: "linear-gradient(135deg, #3e9bed 0%, #00e1ed 100%)" },
               }}
             >
-              {isLoading ? "Sending..." : mode === "assistant" ? "Ask AI" : mode === "search" ? "Search" : "Check"}
+              {isLoading ? "Sending..." : "Send"}
             </Button>
           </Stack>
         </Box>
