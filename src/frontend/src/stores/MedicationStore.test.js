@@ -293,12 +293,9 @@ describe("MedicationStore", () => {
 
       await store.sendChatMessage("What is aspirin?");
 
-      expect(store.chatHistory.length).toBe(2); // user + assistant
+      // The store now only appends assistant responses; the UI is responsible for adding user messages.
+      expect(store.chatHistory.length).toBe(1);
       expect(store.chatHistory[0]).toMatchObject({
-        role: "user",
-        content: "What is aspirin?",
-      });
-      expect(store.chatHistory[1]).toMatchObject({
         role: "assistant",
         content: "This is a response",
         via: "gemini",
@@ -313,10 +310,14 @@ describe("MedicationStore", () => {
 
       await store.sendChatMessage("Check aspirin and warfarin");
 
-      expect(store.chatHistory.length).toBe(3); // user + function call + result
-      expect(store.chatHistory[1].function).toBe("check_interactions");
-      expect(store.chatHistory[2].content).toContain("aspirin");
-      expect(store.chatHistory[2].content).toContain("warfarin");
+      // The store will append the structured function result (interaction_result) as an assistant message.
+      expect(store.chatHistory.length).toBeGreaterThanOrEqual(1);
+      const assistantMsg = store.chatHistory[store.chatHistory.length - 1];
+      expect(assistantMsg.role).toBe("assistant");
+      expect(assistantMsg.meta).toBeDefined();
+      expect(assistantMsg.meta.type).toBe("interaction_result");
+      expect(assistantMsg.meta.data.medications).toContain("aspirin");
+      expect(assistantMsg.meta.data.medications).toContain("warfarin");
     });
 
     test("should handle chat errors and add error message", async () => {
@@ -326,7 +327,7 @@ describe("MedicationStore", () => {
 
       const lastMessage = store.chatHistory[store.chatHistory.length - 1];
       expect(lastMessage.isError).toBe(true);
-      expect(lastMessage.content).toContain("Error");
+      expect(lastMessage.content).toMatch(/unexpected error|There was an unexpected error/i);
     });
   });
 

@@ -18,6 +18,17 @@ class MedicationStore {
   }
 
   // Actions
+  // Add a chat message (use from UI to respect MobX actions)
+  addChatMessage(message) {
+    this.chatHistory.push(message);
+  }
+
+  // Remove the first pending message (used to clear 'Thinking...')
+  removePendingMessage() {
+    const idx = this.chatHistory.findIndex((m) => m.isPending);
+    if (idx !== -1) this.chatHistory.splice(idx, 1);
+  }
+
   setShowQuery(value) {
     this.showQuery = value;
   }
@@ -73,43 +84,26 @@ class MedicationStore {
         const errorData = await response.json();
         const status = response.status;
         const err = new Error(errorData.message || "Failed to fetch medication information");
-        // prefer explicit code from API, otherwise fallback to HTTP status
         err.code = errorData.code || status;
-        // mark as already handled so catch block doesn't duplicate handling
         err.handled = true;
 
         runInAction(() => {
-          // Map 404 to a clear 'not found' message
           if (status === 404 || err.code === 404) {
             this.error = {
               title: errorData.title || "Medication not found",
               message:
                 errorData.message ||
-                `We couldn't find information for \"${medicationName}\". Please check the spelling or try a different medication name.`,
+                `We couldn't find information for "${medicationName}". Please check the spelling or try a different medication name.`,
               action: errorData.action || "Try a different medication name or check spelling.",
             };
 
-            this.chatHistory.push({
-              role: "assistant",
-              content: `I couldn't find information for \"${medicationName}\". Try checking the spelling or use a generic/common name.`,
-              timestamp: new Date(),
-              isError: true,
-            });
+            // Don't add to chat history here - let the UI component handle it
           } else {
-            // structured error for UI (generic)
             this.error = {
               title: errorData.title || "Medication lookup failed",
               message: errorData.message || "The medication could not be retrieved.",
               action: errorData.action || "Please check the name or try again later.",
             };
-
-            // Notify user via assistant chat (keeps the assistant in the loop)
-            this.chatHistory.push({
-              role: "assistant",
-              content: `Unable to retrieve medication information: ${this.error.message}`,
-              timestamp: new Date(),
-              isError: true,
-            });
           }
 
           this.isLoading = false;
@@ -163,21 +157,12 @@ class MedicationStore {
       return data;
     } catch (error) {
       runInAction(() => {
-        // If this error was already handled above (err.handled), don't duplicate messages
         if (!error.handled) {
           this.error = {
             title: "Request failed",
             message: error.message || "Failed to fetch medication information",
             action: "Please try again or check your network connection.",
           };
-
-          // push assistant-visible message
-          this.chatHistory.push({
-            role: "assistant",
-            content: `Unable to retrieve medication information: ${this.error.message}`,
-            timestamp: new Date(),
-            isError: true,
-          });
         }
         this.isLoading = false;
       });
@@ -227,19 +212,14 @@ class MedicationStore {
 
   /**
    * AI Chat with Gemini - supports function calling
+   * FIXED: Now properly handles both function calls AND text-only responses
    */
   async sendChatMessage(prompt) {
     this.setIsLoading(true);
     this.clearError();
 
-    // Add user message to history immediately
-    runInAction(() => {
-      this.chatHistory.push({
-        role: "user",
-        content: prompt,
-        timestamp: new Date(),
-      });
-    });
+    // Don't add user message here - let the UI component handle it
+    // The UI already adds it before calling this function
 
     try {
       const response = await fetch(`${this.baseURL}/chat`, {
@@ -260,10 +240,8 @@ class MedicationStore {
       const data = await response.json();
 
       runInAction(() => {
-        // Handle different response types from Gemini
+        // Handle function call responses
         if (data.via === "gemini:function_call") {
-          // Function call response - add the function result as an assistant message
-          // Handle function call results without exposing internal function names
           if (data.result && data.result.data) {
             const resultData = data.result.data;
             let resultText = "";
@@ -289,7 +267,7 @@ class MedicationStore {
                 meta: { type: "interaction_result", data: resultData },
               });
             } else if (resultData.generic_name) {
-              // Medication info result - attach structured data so UI can render hierarchy
+              // Medication info result
               resultText = `**${resultData.generic_name}** (${resultData.drug_class || "Unknown class"})\n\n`;
               resultText += `Uses: ${Array.isArray(resultData.uses) ? resultData.uses.join(", ") : "Not specified"}\n`;
               resultText += `Dosage: ${resultData.common_dosage || "Consult healthcare provider"}\n\n`;
@@ -305,7 +283,9 @@ class MedicationStore {
               });
             }
           }
-          // Text-only response
+        }
+
+        if (data.text) {
           this.chatHistory.push({
             role: "assistant",
             content: data.text,
@@ -319,9 +299,6 @@ class MedicationStore {
 
       return data;
     } catch (error) {
-      // Log the raw error for debugging but show a generic message to users
-      // to avoid leaking internal service/provider errors.
-      // eslint-disable-next-line no-console
       console.error("sendChatMessage error:", error);
 
       runInAction(() => {
@@ -372,7 +349,6 @@ class MedicationStore {
       return await response.json();
     } catch (error) {
       console.error("Failed to log query:", error);
-      // Don't throw error for logging failures
       return null;
     }
   }
