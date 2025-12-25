@@ -509,6 +509,13 @@ const ChatAssistant = observer(() => {
         </Typography>
       </Box>
 
+      <Box sx={{ px: "15%", py: 1.5, bgcolor: "#FFF9E6", borderBottom: 1, borderColor: "divider" }}>
+        <Typography variant="caption" color="text.secondary" sx={{ display: "block", lineHeight: 1.4 }}>
+          <strong>AI Limitations:</strong> This assistant can make mistakes. For educational purposes only—not a
+          substitute for professional medical advice. Always consult healthcare providers.
+        </Typography>
+      </Box>
+
       <Box sx={{ p: 0, flex: 1, display: "flex", flexDirection: "column", overflow: "auto" }}>
         <Paper
           variant="outlined"
