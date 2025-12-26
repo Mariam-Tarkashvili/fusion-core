@@ -1041,52 +1041,14 @@ medsplain/
 - Customer lifetime value (LTV)
 - Churn rate
 
-### D. Team Contributions
 
-**Mariam Tarkashvili** (30% of total work)
-
-- RAG pipeline architecture and implementation
-- Pinecone integration and hybrid search
-- Backend API development
-- System architecture design
-
-**Saba Samkharadze** (25% of total work)
-
-- Flask backend development
-- Database schema design
-- API endpoint implementation
-- Deployment and DevOps
-
-**Tekla Chapidze** (20% of total work)
-
-- Testing framework and QA
-- Documentation
-- CI/CD pipeline setup
-- Performance monitoring
-
-**Giorgi Ksovreli** (15% of total work)
-
-- Frontend UI/UX design
-- React component development
-- User testing coordination
-- Design system
-
-**Akaki Ghachava** (10% of total work)
-
-- Model optimization
-- Cost analysis and reduction
-- Performance profiling
-- Prompt engineering
 
 ### E. Acknowledgments
 
 We thank:
 
 - Our users who participated in testing and provided invaluable feedback
-- Professor [Name] for guidance throughout the capstone project
-- Dr. Sarah Kim, PharmD, for medical domain expertise consultation
-- The OpenAI and Pinecone teams for technical documentation
-- Healthcare professionals who validated our accuracy testing
+- Professor Zeshan Ahmad for guidance throughout the capstone project
 
 ---
 
