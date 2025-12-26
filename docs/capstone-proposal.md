@@ -163,6 +163,11 @@ An AI-powered medication explainer addresses this by translating complex medical
 - RAG implementation for structured medical data (FDA labels, drug databases)
 - Building telemetry and monitoring for production LLM apps
 
+**Akaki Ghachava**: 
+- Backend architecture for secure, scalable AI-powered applications
+- Data privacy and compliance considerations in medical software
+- Integrating AI services into existing systems (auth, databases, APIs)
+
 
 
 ---

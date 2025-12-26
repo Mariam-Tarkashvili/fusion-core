@@ -1,14 +1,18 @@
 # 🚀 Fusion Core
 
+## App Demo
+
+<video src="presentation\Demo Video.mp4" controls>
+
 **Built for Building AI‑Powered Applications course**
 
 ## 👥 Team Members
+
 - Mariam Tarkashvili
 - Tekla Chapidze
 - Saba Samkharadze
 - Akaki Ghachava
 - Giorgi Ksovreli
-  
 
 ---
 
@@ -21,6 +25,7 @@ This repository serves as the central workspace for our capstone project, contai
 ---
 
 ## 🧩 Repository Structure
+
 ```bash
 FusionCore/
 │
@@ -45,6 +50,7 @@ FusionCore/
 ## 🎯 Week 2 Deliverable: Capstone Proposal
 
 ### Contents
+
 - **Problem Statement:** What problem we aim to solve and why it matters
 - **Target Users:** Who benefits and their core pain points
 - **Success Criteria:** How we'll measure impact and effectiveness
@@ -96,11 +102,13 @@ This week implements the RAG-powered medication intelligence backend with functi
 ### 1. `get_medication_info`
 
 **Input:**
+
 - `medication_name: str`
 - `include_interactions: bool` (optional)
 - `include_side_effects: bool` (optional)
 
 **Output:**
+
 ```json
 {
   "status": "success" | "error",
@@ -115,9 +123,11 @@ This week implements the RAG-powered medication intelligence backend with functi
 ### 2. `check_multiple_interactions`
 
 **Input:**
+
 - `medications: List[str]` (2–5 items)
 
 **Output:**
+
 ```json
 {
   "status": "success",
@@ -137,9 +147,11 @@ This week implements the RAG-powered medication intelligence backend with functi
 ### 3. `generate_explanation`
 
 **Input:**
+
 - `medication_name: str`
 
 **Output:**
+
 ```json
 {
   "status": "success" | "error",
@@ -161,12 +173,14 @@ This week implements the RAG-powered medication intelligence backend with functi
 ### 4. `log_interaction_query`
 
 **Input:**
+
 - `medications: List[str]`
 - `interactions_found: int`
 - `severity_level: str`
 - `timestamp` (optional)
 
 **Output:**
+
 ```json
 {
   "status": "success",
@@ -182,12 +196,14 @@ This week implements the RAG-powered medication intelligence backend with functi
 ### 5. `submit_feedback`
 
 **Input:**
+
 - `explanation_id: str`
 - `user_id: str`
 - `feedback_type: str` (helpful or unclear)
 - `comment: str` (optional)
 
 **Output:**
+
 ```json
 {
   "status": "success",
@@ -201,13 +217,13 @@ This week implements the RAG-powered medication intelligence backend with functi
 
 ## 🧪 Code Quality & Documentation Checklist
 
-| Requirement | Status |
-|------------|--------|
-| README updated with Week 6 section | ✅ Done |
-| Docstrings on all functions | ✔️ Yes (all functions documented) |
-| Type hints present | ✔️ Yes |
-| Error handling | ✔️ Implemented (no API key, not found, invalid input) |
-| No hard-coded API keys | ✔️ Uses environment variables (`GEMINI_API_KEY`) |
+| Requirement                        | Status                                                |
+| ---------------------------------- | ----------------------------------------------------- |
+| README updated with Week 6 section | ✅ Done                                               |
+| Docstrings on all functions        | ✔️ Yes (all functions documented)                     |
+| Type hints present                 | ✔️ Yes                                                |
+| Error handling                     | ✔️ Implemented (no API key, not found, invalid input) |
+| No hard-coded API keys             | ✔️ Uses environment variables (`GEMINI_API_KEY`)      |
 
 ---
 
@@ -222,47 +238,60 @@ This architecture describes how the backend system processes medication-related 
 The system follows a structured pipeline:
 
 ### 1. React Frontend
+
 The user interacts with the interface and submits queries (e.g., "What does ibuprofen do?").
 
 ### 2. Flask API (`api.py`)
+
 Receives HTTP requests and routes them to the correct operation:
+
 - `/api/medication-info`
 - `/api/check-interactions`
 - `/api/explain`
 - `/api/feedback`
 
 ### 3. Functions Layer (`functions.py`)
+
 The API does not contain logic. Instead, it calls one of your four main functions:
+
 - `get_medication_info`
 - `check_multiple_interactions`
 - `generate_explanation`
 - `submit_feedback`
 
 These functions contain:
+
 - type hints
 - docstrings
 - structured error handling
 - return values that match Week 6–7 function calling requirements
 
 ### 4. Pydantic Models (`models.py`)
+
 Used for:
+
 - validating inputs
 - validating outputs
 - enforcing a consistent schema for Gemini function-calling
 
 ### 5. RAG Service (`rag_service.py`)
+
 Central component that retrieves medication data. Responsibilities:
+
 - querying OpenFDA
 - normalizing the result
 - merging multiple sources
 - preparing context for Gemini
 
 ### 6. External APIs
+
 - **OpenFDA** → official drug data
 - **Gemini** → natural language explanations, reasoning, summarization
 
 ### 7. Response Back to the User
+
 After processing, the system returns:
+
 - medication information
 - side effects
 - safety warnings
@@ -272,11 +301,13 @@ After processing, the system returns:
 ---
 
 ## 🔹 Request Flow Summary
+
 ```
 User → React → Flask API → Functions Layer → RAG Service → OpenFDA/Gemini → Response
 ```
 
 Each layer has one job:
+
 - **Frontend:** Interface
 - **API:** Routing
 - **Functions:** Logic
@@ -293,7 +324,7 @@ Each layer has one job:
 - **Safe** — error handling prevents API crashes
 - **RAG-ready** — explanations use real medical data (OpenFDA)
 - **AI-compatible** — Gemini function-calling produces structured responses
-  
+
 ---
 
 ## 📘 Notes for Grader
